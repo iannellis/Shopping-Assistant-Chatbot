@@ -8,6 +8,7 @@ __pycache__/
 
 ABO_dataset/
 LAVIS/
+.vscode
 
 # Distribution / packaging
 .Python
