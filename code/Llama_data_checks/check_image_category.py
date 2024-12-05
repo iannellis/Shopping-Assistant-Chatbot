@@ -56,7 +56,39 @@ def run_dataset_check(pdf_has_images, iloc_start, iloc_end, image_path_prefix, s
             save_dataset(image_categroy_match, save_name)
 
     save_dataset(image_categroy_match, save_name)
+
+def resume_dataset_check(pdf_has_images, iloc_start, iloc_end, image_path_prefix, save_name):
+    image_meta_df = load_image_meta()    
+
+    image_categroy_match_df = pd.read_pickle('ABO_dataset/abo-category-check-comp-2.pkl')
     
+    image_categroy_match = image_categroy_match_df.to_dict(orient='list')
+    image_categroy_match['image_id'] = image_categroy_match_df.to_dict(orient='split')['index']
+    
+    resume_iter = len(image_categroy_match_df['item_id'].unique())
+    print(f'Resuming from iteration: {resume_iter}')
+    for i, item_id in enumerate(tqdm(pdf_has_images.index[iloc_start:iloc_end])):
+        if i<resume_iter:  # just for tqdm progress bar (time won't be correct though)
+            continue
+    
+        row = pdf_has_images.loc[item_id]
+        product_type = row['product_type']
+        image_ids = get_all_image_ids(row)
+        
+        for image_id in image_ids:
+            image_path = image_path_prefix + '/' + image_meta_df.loc[image_id, 'path']
+            image = Image.open(image_path)
+            match = llama_check_image_category(product_type, image)
+            image_categroy_match['image_id'].append(image_id)
+            image_categroy_match['item_id'].append(item_id)
+            image_categroy_match['product_type'].append(product_type)
+            image_categroy_match['match'].append(match)
+            
+        if i % 5000 == 0:
+            save_dataset(image_categroy_match, save_name)
+
+    save_dataset(image_categroy_match, save_name)
+
 def load_image_meta():
     image_meta_path = 'ABO_dataset/images/metadata/images.csv'
     image_meta_df = pd.read_csv(image_meta_path).set_index('image_id')
