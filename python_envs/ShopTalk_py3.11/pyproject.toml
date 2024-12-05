@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "ShopTalk_py3.11"
+version = "0.1.0"
+description = ""
+authors = ["Ian Ellis <iellis@minevaluation.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.12"
+salesforce-lavis = "^1.0.2"
+torch = {version = "^2.5.1+cu124", source = "pytorch-gpu-src"}
+torchvision = {version = "^0.20.1+cu124", source = "pytorch-gpu-src"}
+torchaudio = {version = "^2.5.1+cu124", source = "pytorch-gpu-src"}
+transformers = "4.26.1"
+ipykernel = "^6.29.5"
+requests = "^2.32.3"
+iprogress = "^0.4"
+accelerate = "^1.1.1"
+bitsandbytes = "^0.44.1"
+huggingface-hub = "^0.26.2"
+ipywidgets = "^8.1.5"
+numpy = "<2.0"
+lingua-language-detector = "^2.0.2"
+fasttext-wheel = "^0.9.2"
+google-cloud-translate = "^3.18.0"
+mediapipe = "^0.10.18"
+opencv-python = "^4.10.0.84"
+pympler = "^1.1"
+
+[[tool.poetry.source]]
+name = "pytorch-gpu-src"
+url = "https://download.pytorch.org/whl/cu124"
+priority = "explicit"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
