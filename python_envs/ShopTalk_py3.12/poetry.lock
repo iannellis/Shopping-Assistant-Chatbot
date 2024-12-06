@@ -942,6 +942,20 @@ test-full = ["adlfs", "aiohttp (!=4.0.0a0,!=4.0.0a1)", "cloudpickle", "dask", "d
 tqdm = ["tqdm"]
 
 [[package]]
+name = "ftfy"
+version = "6.3.1"
+description = "Fixes mojibake and other problems with Unicode, after the fact"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "ftfy-6.3.1-py3-none-any.whl", hash = "sha256:7c70eb532015cd2f9adb53f101fb6c7945988d023a085d127d1573dc49dd0083"},
+    {file = "ftfy-6.3.1.tar.gz", hash = "sha256:9b3c3d90f84fb267fe64d375a07b7f8912d817cf86009ae134aa03e1819506ec"},
+]
+
+[package.dependencies]
+wcwidth = "*"
+
+[[package]]
 name = "google-api-core"
 version = "2.23.0"
 description = "Google API client core library"
@@ -2278,6 +2292,31 @@ files = [
 httpx = ">=0.27.0,<0.28.0"
 
 [[package]]
+name = "open-clip-torch"
+version = "2.29.0"
+description = "Open reproduction of consastive language-image pretraining (CLIP) and related."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "open_clip_torch-2.29.0-py3-none-any.whl", hash = "sha256:86e50e7493efdb223daae369be41a0d614e30fd78316c30fa166ceac0e7a360e"},
+    {file = "open_clip_torch-2.29.0.tar.gz", hash = "sha256:f443d7c1ca30f0e4759b7d005cf1b208abc85611e5489140d1bccccedce655c1"},
+]
+
+[package.dependencies]
+ftfy = "*"
+huggingface-hub = "*"
+regex = "*"
+safetensors = "*"
+timm = "*"
+torch = ">=1.9.0"
+torchvision = "*"
+tqdm = "*"
+
+[package.extras]
+test = ["open_clip_torch[training]", "pytest", "pytest-split"]
+training = ["fsspec", "pandas", "timm (>=1.0.10)", "torch (>=2.0)", "transformers[sentencepiece]", "webdataset (>=0.2.5,<=0.2.86)"]
+
+[[package]]
 name = "opencv-contrib-python"
 version = "4.10.0.84"
 description = "Wrapper package for OpenCV python bindings."
@@ -3587,6 +3626,24 @@ mpmath = ">=1.1.0,<1.4"
 dev = ["hypothesis (>=6.70.0)", "pytest (>=7.1.0)"]
 
 [[package]]
+name = "timm"
+version = "1.0.12"
+description = "PyTorch Image Models"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "timm-1.0.12-py3-none-any.whl", hash = "sha256:6b2770674213f10b7f193be5598ce48bd010ab21cc8af77dba6aeef58b1298a1"},
+    {file = "timm-1.0.12.tar.gz", hash = "sha256:9da490683bd06302ec40e1892f1ccf87985f033e41f3580887d886b9aee9449a"},
+]
+
+[package.dependencies]
+huggingface_hub = "*"
+pyyaml = "*"
+safetensors = "*"
+torch = "*"
+torchvision = "*"
+
+[[package]]
 name = "tokenizers"
 version = "0.21.0"
 description = ""
@@ -4162,4 +4219,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "c4c8768a862d187d0956a98ace3e999fcdcd3d964e85a58becb25f62b3ba3d3a"
+content-hash = "3e2a2d221d81e59d17b2831d5ef149f215acfc0644ded93075a2b9edeb6c06b5"
