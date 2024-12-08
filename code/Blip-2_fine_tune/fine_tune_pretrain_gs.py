@@ -9,7 +9,8 @@ from tqdm import tqdm
 import random
 import pickle
 
-def run_pretrain(marqo_gs_data_dir = '/mnt/d/marqo-gs-10m', device='cuda', save_dir='/mnt/d/saves'):
+def run_pretrain(marqo_gs_data_dir='/mnt/d/marqo-gs-10m', device='cuda',
+                 save_dir='/mnt/d/marqo-gs-10m/model-saves'):
     model, vis_processors, txt_processors = load_model_and_preprocess(
         name="blip2_feature_extractor", model_type="pretrain", is_eval=False, device=device)
     images_dir = marqo_gs_data_dir + '/images'
@@ -103,9 +104,9 @@ def train(model, dataloader, device, optimizer, epochs, save_dir):
                 print(f'  batch {i+1} loss: {last_loss}')
                 running_loss = 0
         
-        if i % 5000 == 4999:
-            iteration = epoch * len(dataloader) + i
-            save_model_and_loss(model, losses, save_dir, f'pretrain+{iteration}')
+            if i % 5000 == 4999:
+                iteration = epoch * len(dataloader) + i
+                save_model_and_loss(model, losses, save_dir, f'pretrain+{iteration}')
 
     return losses
 
