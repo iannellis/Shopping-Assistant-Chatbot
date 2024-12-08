@@ -9,7 +9,7 @@ from tqdm import tqdm
 import random
 import pickle
 
-def run_pretrain(marqo_gs_data_dir = '/mnt/d/marqo-gs-10m', device='cuda', save_dir='../../saves'):
+def run_pretrain(marqo_gs_data_dir = '/mnt/d/marqo-gs-10m', device='cuda', save_dir='/mnt/d/saves'):
     model, vis_processors, txt_processors = load_model_and_preprocess(
         name="blip2_feature_extractor", model_type="pretrain", is_eval=False, device=device)
     images_dir = marqo_gs_data_dir + '/images'
@@ -31,8 +31,8 @@ def run_pretrain(marqo_gs_data_dir = '/mnt/d/marqo-gs-10m', device='cuda', save_
     os.environ['MASTER_ADDR'] = 'localhost'
     os.environ['MASTER_PORT'] = '29500'
     torch.distributed.init_process_group(backend="nccl", world_size=1, rank=0)
-    losses_train = train_one_epoch(model=model, dataloader=train_dataloader, device=device,
-                                   optimizer=optimizer, save_dir=save_dir)
+    losses_train = train(model=model, dataloader=train_dataloader, device=device,
+                                   optimizer=optimizer, epochs=1, save_dir=save_dir)
     save_model_and_loss(model, losses_train, save_dir, 'pretrain_1epoch')
     losses_validate = validate(model=model, dataloader=val_dataloader, device=device, save_dir=save_dir)
     save_validate_loss(losses_validate, save_dir, 'validate_final')
@@ -78,30 +78,34 @@ def get_sample_weights(annotations_file: str):
     weights = 1 / ( query_counts_full * product_counts_full)
     return weights
 
-def train_one_epoch(model, dataloader, device, optimizer, save_dir):
+def train(model, dataloader, device, optimizer, epochs, save_dir):
     losses = []
     running_loss = 0
     
+    scaler = torch.GradScaler()
     model.train()
-    for i, data in enumerate(tqdm(dataloader)):
-        images, labels = data
-        images = images.to(device)
-        samples = {"image": images, "text_input": labels}
-        
-        optimizer.zero_grad()
-        with torch.autocast(device_type="cuda"):
-            output = model(samples)
-        output.loss.backward()
-        optimizer.step()
-        running_loss += output.loss.item()
-        if i % 1000 == 999:
-            last_loss = running_loss / 1000
-            losses.append(last_loss)
-            print(f'  batch {i+1} loss: {last_loss}')
-            running_loss = 0
+    for epoch in range(epochs): 
+        for i, data in enumerate(tqdm(dataloader)):
+            images, labels = data
+            images = images.to(device)
+            samples = {"image": images, "text_input": labels}
+            
+            optimizer.zero_grad()
+            with torch.autocast(device_type=device):
+                output = model(samples)
+            scaler.scale(output.loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+            running_loss += output.loss.item()
+            if i % 1000 == 999:
+                last_loss = running_loss / 1000
+                losses.append(last_loss)
+                print(f'  batch {i+1} loss: {last_loss}')
+                running_loss = 0
         
         if i % 5000 == 4999:
-            save_model_and_loss(model, losses, save_dir, f'pretrain+{i}')
+            iteration = epoch * len(dataloader) + i
+            save_model_and_loss(model, losses, save_dir, f'pretrain+{iteration}')
 
     return losses
 
@@ -115,7 +119,7 @@ def validate(model, dataloader, device, save_dir):
         images, labels = data
         images = images.to(device)
         samples = {"image": images, "text_input": labels}
-        with torch.autocast(device_type="cuda"):
+        with torch.autocast(device_type=device):
             output = model(samples)
         running_loss += output.loss.item()
         if i % 1000 == 999:
