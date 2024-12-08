@@ -137,8 +137,8 @@ def validate(model, dataloader, device, save_dir):
 def save_model_and_loss(model, loss, save_dir, file_prefix):
     torch.save(model, save_dir + '/' + file_prefix +'.pt')
     with open(save_dir + '/' + file_prefix + '_loss', 'wb') as f:            
-        pickle.dumps(loss, f)
+        pickle.dump(loss, f)
         
 def save_validate_loss(loss, save_dir, file_prefix):
     with open(save_dir + '/' + file_prefix + '_loss', 'wb') as f:            
-        pickle.dumps(loss, f)
+        pickle.dump(loss, f)
