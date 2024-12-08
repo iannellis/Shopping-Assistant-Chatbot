@@ -105,7 +105,7 @@ def train(model, dataloader, device, optimizer, epochs, save_dir):
                 running_loss = 0
         
             if i % 5000 == 4999:
-                iteration = epoch * len(dataloader) + i
+                iteration = epoch * len(dataloader) + i + 1
                 save_model_and_loss(model, losses, save_dir, f'pretrain+{iteration}')
 
     return losses
@@ -130,7 +130,7 @@ def validate(model, dataloader, device, save_dir):
             running_loss = 0
         
         if i % 5000 == 4999:
-            save_validate_loss(losses, save_dir, f'validate_{i}')
+            save_validate_loss(losses, save_dir, f'validate_{i+1}')
             
     return losses
 
