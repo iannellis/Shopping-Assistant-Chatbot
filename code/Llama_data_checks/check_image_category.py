@@ -90,6 +90,29 @@ def resume_dataset_check(pdf_has_images, iloc_start, iloc_end, image_path_prefix
             save_dataset(image_categroy_match, save_name)
 
     save_dataset(image_categroy_match, save_name)
+    
+def run_missing_items(pdf_has_images, missing_items, image_path_prefix, save_name):
+    image_meta_df = load_image_meta()    
+
+    image_categroy_match = {'image_id': [], 'item_id': [], 'product_type': [], 'match': []}
+    for i, item_id in enumerate(tqdm(missing_items)):
+        row = pdf_has_images.loc[item_id]
+        product_type = row['product_type']
+        image_ids = get_all_image_ids(row)
+        
+        for image_id in image_ids:
+            image_path = image_path_prefix + '/' + image_meta_df.loc[image_id, 'path']
+            image = Image.open(image_path)
+            match = llama_check_image_category(product_type, image)
+            image_categroy_match['image_id'].append(image_id)
+            image_categroy_match['item_id'].append(item_id)
+            image_categroy_match['product_type'].append(product_type)
+            image_categroy_match['match'].append(match)
+            
+        if i % 1000 == 0:
+            save_dataset(image_categroy_match, save_name)
+
+    save_dataset(image_categroy_match, save_name)
 
 def load_image_meta():
     image_meta_path = shoptalk_blobs_dir + 'ABO_dataset/images/metadata/images.csv'
