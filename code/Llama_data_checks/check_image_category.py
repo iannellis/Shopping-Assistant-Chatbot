@@ -20,8 +20,10 @@ model = MllamaForConditionalGeneration.from_pretrained(
 )
 processor = AutoProcessor.from_pretrained(model_id)
 
+shoptalk_blobs_dir = "../ShopTalk-blobs/"
+
 def load_listings():
-    pdf = pd.read_pickle("../Capstone Project - ShopTalk/ABO_dataset/abo-listings-english-tags.pkl")
+    pdf = pd.read_pickle(shoptalk_blobs_dir + "ABO_dataset/abo-listings-english-tags.pkl")
     pdf['product_type'] = pdf['product_type'].str.replace('_', ' ')
     pdf.loc[pdf['product_type'] == 'FINERING', 'product_type'] = 'FINE RING'
     pdf.loc[pdf['product_type'] == 'FINENECKLACEBRACELETANKLET', 'product_type'] = 'FINE NECKLACE BRACELET ANKLET'
@@ -60,7 +62,7 @@ def run_dataset_check(pdf_has_images, iloc_start, iloc_end, image_path_prefix, s
 def resume_dataset_check(pdf_has_images, iloc_start, iloc_end, image_path_prefix, save_name):
     image_meta_df = load_image_meta()    
 
-    image_categroy_match_df = pd.read_pickle('../Capstone Project - ShopTalk/ABO_dataset/abo-category-check-comp-2.pkl')
+    image_categroy_match_df = pd.read_pickle(shoptalk_blobs_dir + 'ABO_dataset/' + save_name)
     
     image_categroy_match = image_categroy_match_df.to_dict(orient='list')
     image_categroy_match['image_id'] = image_categroy_match_df.to_dict(orient='split')['index']
@@ -88,9 +90,32 @@ def resume_dataset_check(pdf_has_images, iloc_start, iloc_end, image_path_prefix
             save_dataset(image_categroy_match, save_name)
 
     save_dataset(image_categroy_match, save_name)
+    
+def run_missing_items(pdf_has_images, missing_items, image_path_prefix, save_name):
+    image_meta_df = load_image_meta()    
+
+    image_categroy_match = {'image_id': [], 'item_id': [], 'product_type': [], 'match': []}
+    for i, item_id in enumerate(tqdm(missing_items)):
+        row = pdf_has_images.loc[item_id]
+        product_type = row['product_type']
+        image_ids = get_all_image_ids(row)
+        
+        for image_id in image_ids:
+            image_path = image_path_prefix + '/' + image_meta_df.loc[image_id, 'path']
+            image = Image.open(image_path)
+            match = llama_check_image_category(product_type, image)
+            image_categroy_match['image_id'].append(image_id)
+            image_categroy_match['item_id'].append(item_id)
+            image_categroy_match['product_type'].append(product_type)
+            image_categroy_match['match'].append(match)
+            
+        if i % 1000 == 0:
+            save_dataset(image_categroy_match, save_name)
+
+    save_dataset(image_categroy_match, save_name)
 
 def load_image_meta():
-    image_meta_path = '../Capstone Project - ShopTalk/ABO_dataset/images/metadata/images.csv'
+    image_meta_path = shoptalk_blobs_dir + 'ABO_dataset/images/metadata/images.csv'
     image_meta_df = pd.read_csv(image_meta_path).set_index('image_id')
     return image_meta_df
 
@@ -123,4 +148,4 @@ def llama_check_image_category(product_type, image):
 
 def save_dataset(image_categroy_match, save_name):
     image_categroy_match_df = pd.DataFrame(image_categroy_match).set_index('image_id')
-    image_categroy_match_df.to_pickle("../Capstone Project - ShopTalk/ABO_dataset/" + save_name)
+    image_categroy_match_df.to_pickle(shoptalk_blobs_dir + "ABO_dataset/" + save_name)
