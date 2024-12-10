@@ -1,3 +1,5 @@
+from shared import train, validate, save_model_and_loss, save_validate_loss
+
 from lavis.models import load_model_and_preprocess
 import torch
 from torch.utils.data import Dataset, WeightedRandomSampler, DataLoader
@@ -5,9 +7,7 @@ from PIL import Image
 import pandas as pd
 
 import os
-from tqdm import tqdm
 import random
-import pickle
 
 def run_pretrain(marqo_gs_data_dir='/mnt/d/marqo-gs-10m', device='cuda',
                  save_dir='/mnt/d/marqo-gs-10m/model-saves'):
@@ -79,67 +79,3 @@ def get_sample_weights(annotations_file: str):
     product_counts_full = product_counts[annotations_df['product_id']].to_numpy()
     weights = 1 / ( query_counts_full * product_counts_full)
     return weights
-
-def train(model, dataloader, device, optimizer, epochs, save_dir):
-    losses = []
-    running_loss = 0
-    
-    scaler = torch.GradScaler()
-    model.train()
-    for epoch in range(epochs): 
-        for i, data in enumerate(tqdm(dataloader)):
-            images, labels = data
-            images = images.to(device)
-            samples = {"image": images, "text_input": labels}
-            
-            optimizer.zero_grad()
-            with torch.autocast(device_type=device):
-                output = model(samples)
-            scaler.scale(output.loss).backward()
-            scaler.step(optimizer)
-            scaler.update()
-            running_loss += output.loss.item()
-            if i % 1000 == 999:
-                last_loss = running_loss / 1000
-                losses.append(last_loss)
-                print(f'  batch {i+1} loss: {last_loss}')
-                running_loss = 0
-        
-            if i % 5000 == 4999:
-                iteration = epoch * len(dataloader) + i + 1
-                save_model_and_loss(model, losses, save_dir, f'pretrain+{iteration}')
-
-    return losses
-
-@torch.no_grad()
-def validate(model, dataloader, device, save_dir):
-    losses = []
-    running_loss = 0
-    
-    model.eval()
-    for i, data in enumerate(tqdm(dataloader)):
-        images, labels = data
-        images = images.to(device)
-        samples = {"image": images, "text_input": labels}
-        with torch.autocast(device_type=device):
-            output = model(samples)
-        running_loss += output.loss.item()
-        if i % 1000 == 999:
-            last_loss = running_loss / 1000
-            losses.append(last_loss)
-            print(f'  batch {i+1} loss: {last_loss}')
-            running_loss = 0
-        
-        if i % 5000 == 4999:
-            save_validate_loss(losses, save_dir, f'validate_{i+1}')
-            
-    return losses
-
-def save_model_and_loss(model, loss, save_dir, file_prefix):
-    torch.save(model, save_dir + '/' + file_prefix +'.pt')
-    with open(save_dir + '/' + file_prefix + '_loss', 'wb') as f:            
-        pickle.dump(loss, f)
-        
-def save_validate_loss(loss, save_dir, file_prefix):
-    with open(save_dir + '/' + file_prefix + '_loss', 'wb') as f:            
-        pickle.dump(loss, f)
