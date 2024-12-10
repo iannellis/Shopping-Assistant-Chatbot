@@ -37,6 +37,7 @@ def run_pretrain(marqo_gs_data_dir='/mnt/d/marqo-gs-10m', device='cuda',
     save_model_and_loss(model, losses_train, save_dir, 'pretrain_1epoch')
     losses_validate = validate(model=model, dataloader=val_dataloader, device=device, save_dir=save_dir)
     save_validate_loss(losses_validate, save_dir, 'validate_final')
+    torch.distributed.destroy_process_group()
     return
 
 
