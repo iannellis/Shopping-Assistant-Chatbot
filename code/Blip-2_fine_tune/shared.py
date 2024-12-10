@@ -22,14 +22,15 @@ def train(model, dataloader, device, optimizer, epochs, save_dir):
             scaler.step(optimizer)
             scaler.update()
             running_loss += output.loss.item()
-            if i % 1000 == 999:
+            
+            iteration = epoch * len(dataloader) + i + 1
+            if iteration % 1000 == 999:
                 last_loss = running_loss / 1000
                 losses.append(last_loss)
-                print(f'  batch {i+1} loss: {last_loss}')
+                print(f'  iteration {iteration} loss: {last_loss}')
                 running_loss = 0
         
-            if i % 5000 == 4999:
-                iteration = epoch * len(dataloader) + i + 1
+            if iteration % 5000 == 4999:
                 save_model_and_loss(model, losses, save_dir, f'pretrain+{iteration}')
 
     return losses
