@@ -2,6 +2,7 @@ import torch
 
 from tqdm import tqdm
 import pickle
+from pathlib import Path
 
 def train(model, dataloader, device, optimizer, epochs, save_dir):
     losses = []
@@ -60,6 +61,7 @@ def validate(model, dataloader, device, save_dir):
     return losses
 
 def save_model_and_loss(model, loss, save_dir, file_prefix):
+    Path(save_dir).mkdir(exist_ok=True)
     torch.save(model, save_dir + '/' + file_prefix +'.pt')
     with open(save_dir + '/' + file_prefix + '_loss', 'wb') as f:            
         pickle.dump(loss, f)
