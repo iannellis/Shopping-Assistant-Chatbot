@@ -9,7 +9,7 @@ import pandas as pd
 import os
 import random
 
-def run_pretrain(abo_dataset_dir='/mnt/d/abo-dataset', device='cuda',
+def run_fine_tune(abo_dataset_dir='/mnt/d/abo-dataset', device='cuda',
                  save_dir='/mnt/d/abo-dataset/model_saves'):
     model, vis_processors, txt_processors = load_model_and_preprocess(
         name="blip2_feature_extractor", model_type="pretrain", is_eval=False, device=device)

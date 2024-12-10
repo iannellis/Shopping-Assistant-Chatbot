@@ -9,7 +9,7 @@ import pandas as pd
 import os
 import random
 
-def run_pretrain(marqo_gs_data_dir='/mnt/d/marqo-gs-10m', device='cuda',
+def run_fine_tune(marqo_gs_data_dir='/mnt/d/marqo-gs-10m', device='cuda',
                  save_dir='/mnt/d/marqo-gs-10m/model-saves'):
     model, vis_processors, txt_processors = load_model_and_preprocess(
         name="blip2_feature_extractor", model_type="pretrain", is_eval=False, device=device)
