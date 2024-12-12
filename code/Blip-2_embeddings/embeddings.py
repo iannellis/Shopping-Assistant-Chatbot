@@ -119,7 +119,7 @@ class ABODataset_multimodal(Dataset):
             else:
                 text.append(str(row_item) + ';')
         
-        return ' '.join(text).replace('\n', ' ').replace('^', ' ')
+        return ' '.join(text).replace('\n', ' ').replace('^', ' ').replace(',', ', ')
     
 def build_abo_dataloader_text(metadata_file: str, text_processor: callable,
                               batch_size=64, num_workers=2) -> DataLoader:
