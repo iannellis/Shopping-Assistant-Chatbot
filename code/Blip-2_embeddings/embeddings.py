@@ -7,15 +7,15 @@ import pandas as pd
 import os
 from tqdm import tqdm
 
-import logging
-logger = logging.getLogger(__name__)
+# import logging
+# logger = logging.getLogger(__name__)
 
 model_paths = {'gs': '/mnt/d/marqo-gs-10m/model-saves/pretrain_1epoch.pt',
                'abo': '/mnt/d/abo-dataset/model_saves/pretrain_2epochs.pt'}
 
 def run_embeddings(abo_dataset_dir='/mnt/d/abo-dataset', model_type='pretrain', 
-                   device='cuda', save_path='/mnt/d/embeddings'):
-    logging.basicConfig(filename=save_path + '/' + model_type + '.log', level=logging.INFO)
+                   device='cuda', save_path='/mnt/d/embeddings', batch_size=64):
+    # logging.basicConfig(filename=save_path + '/' + model_type + '.log', level=logging.INFO)
     images_dir = abo_dataset_dir + '/images/small'
     metadata_file = abo_dataset_dir + '/abo-listings-final-draft.pkl'
     image_metadata_file = abo_dataset_dir + '/images/metadata/images.csv'
@@ -27,10 +27,10 @@ def run_embeddings(abo_dataset_dir='/mnt/d/abo-dataset', model_type='pretrain',
     model.to(device)
 
     dataloader_multimodal = build_abo_dataloader_multimodal(
-        images_dir, metadata_file, image_metadata_file, image_processor=vis_processors['train'], 
-        text_processor=txt_processors['train'], batch_size=64, num_workers=2)
+        images_dir, metadata_file, image_metadata_file, image_processor=vis_processors['eval'], 
+        text_processor=txt_processors['eval'], batch_size=batch_size, num_workers=2)
     dataloader_text = build_abo_dataloader_text(
-        metadata_file, text_processor=txt_processors['train'], batch_size=64, num_workers=2)
+        metadata_file, text_processor=txt_processors['eval'], batch_size=batch_size, num_workers=2)
     
     multimodal_embeddings_df = embed_multimodal(model, dataloader_multimodal, device)
     text_embeddings_df = embed_text(model, dataloader_text)
@@ -86,9 +86,6 @@ class ABODataset_multimodal(Dataset):
         self._reorg_metadata_columns()
         
     def _reorg_metadata_columns(self):
-        # self.metadata = self.metadata.drop(columns=['item_weight', 'main_image_id',
-        #                                             'other_image_id', 'country',
-        #                                             'marketplace', 'domain_name'])    
         self.metadata = self.metadata[['item_name', 'brand', 'model_name', 'model_year',
                                        'product_description', 'product_type', 'color',
                                        'fabric_type', 'style', 'material', 'item_keywords',
@@ -106,8 +103,8 @@ class ABODataset_multimodal(Dataset):
         label = self._row_to_str(self.metadata.loc[item_id])
         label = self.text_processor(label)
         
-        log_str = f'multimodal {idx}: image shape: {image.shape}; label length: {len(label)}'
-        logger.info(log_str)
+        # log_str = f'multimodal {idx}: image shape: {image.shape}; label length: {len(label)}'
+        # logger.info(log_str)
         
         return image, label, image_id, item_id
     
@@ -122,7 +119,7 @@ class ABODataset_multimodal(Dataset):
             else:
                 text.append(str(row_item) + ';')
         
-        return ' '.join(text).replace('\n', ' ')
+        return ' '.join(text).replace('\n', ' ').replace('^', ' ')
     
 def build_abo_dataloader_text(metadata_file: str, text_processor: callable,
                               batch_size=64, num_workers=2) -> DataLoader:
@@ -153,8 +150,8 @@ class ABODataset_text(ABODataset_multimodal):
         label = self.text_processor(label)
         item_id = self.metadata.index[idx]
         
-        log_str = f'text {idx}: label length: {len(label)}'
-        logger.info(log_str)
+        # log_str = f'text {idx}: label length: {len(label)}'
+        # logger.info(log_str)
         return label, item_id
         
 def embed_multimodal(model, dataloader, device):
