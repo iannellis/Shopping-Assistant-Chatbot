@@ -7,15 +7,11 @@ import pandas as pd
 import os
 from tqdm import tqdm
 
-# import logging
-# logger = logging.getLogger(__name__)
-
 model_paths = {'gs': '/mnt/d/marqo-gs-10m/model-saves/pretrain_1epoch.pt',
                'abo': '/mnt/d/abo-dataset/model_saves/pretrain_2epochs.pt'}
 
 def run_embeddings(abo_dataset_dir='/mnt/d/abo-dataset', model_type='pretrain', 
                    device='cuda', save_path='/mnt/d/embeddings', batch_size=64):
-    # logging.basicConfig(filename=save_path + '/' + model_type + '.log', level=logging.INFO)
     images_dir = abo_dataset_dir + '/images/small'
     metadata_file = abo_dataset_dir + '/abo-listings-final-draft.pkl'
     image_metadata_file = abo_dataset_dir + '/images/metadata/images.csv'
@@ -103,14 +99,10 @@ class ABODataset_multimodal(Dataset):
         label = self._row_to_str(self.metadata.loc[item_id])
         label = self.text_processor(label)
         
-        # log_str = f'multimodal {idx}: image shape: {image.shape}; label length: {len(label)}'
-        # logger.info(log_str)
-        
         return image, label, image_id, item_id
     
     def _row_to_str(self, row):
         row_filtered = row.dropna()
-        # heading_data_pairs = list(zip(row_filtered.index, row_filtered))
         text = []
         for row_item in row_filtered:
             if isinstance(row_item, list):
@@ -149,9 +141,6 @@ class ABODataset_text(ABODataset_multimodal):
         label = self._row_to_str(self.metadata.iloc[idx])
         label = self.text_processor(label)
         item_id = self.metadata.index[idx]
-        
-        # log_str = f'text {idx}: label length: {len(label)}'
-        # logger.info(log_str)
         return label, item_id
         
 def embed_multimodal(model, dataloader, device):
