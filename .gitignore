@@ -10,6 +10,7 @@ ABO_dataset/
 LAVIS/
 .vscode
 .deepeval_telemtry.txt
+.python_version
 
 # Distribution / packaging
 .Python
