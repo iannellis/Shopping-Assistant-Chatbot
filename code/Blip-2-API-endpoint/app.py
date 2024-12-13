@@ -15,7 +15,7 @@ app = FastAPI(title='BLIP-2 embeddings', openapi_url="/openapi.json")
 api_router = APIRouter()
 
 # the (eval) preprocessors for the model
-with open('../../assets/blip-2-processors.pkl', 'rb') as f:
+with open('assets/blip-2-processors.pkl', 'rb') as f:
     vis_processor, text_processor = pickle.load(f)
 
 # the model itself
