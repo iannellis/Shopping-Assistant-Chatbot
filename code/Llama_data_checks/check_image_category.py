@@ -1,3 +1,5 @@
+# Uses the 3.12 environment locally
+
 import torch
 from transformers import MllamaForConditionalGeneration, AutoProcessor, BitsAndBytesConfig
 import pandas as pd

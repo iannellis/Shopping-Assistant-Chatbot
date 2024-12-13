@@ -1,3 +1,5 @@
+# Uses the 3.11 environment locally
+
 from shared import train, validate, save_model_and_loss, save_validate_loss
 
 from lavis.models import load_model_and_preprocess

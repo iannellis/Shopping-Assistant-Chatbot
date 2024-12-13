@@ -1,3 +1,5 @@
+# Uses the 3.11 environment locally
+
 from lavis.models import load_model_and_preprocess
 import torch
 from torch.utils.data import Dataset, DataLoader
