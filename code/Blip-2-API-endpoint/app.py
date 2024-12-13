@@ -8,6 +8,8 @@ from PIL import Image
 import pickle
 import torch
 
+import warnings
+warnings.filterwarnings('ignore')
 
 app = FastAPI(title='BLIP-2 embeddings', openapi_url="/openapi.json")
 api_router = APIRouter()
@@ -17,8 +19,10 @@ with open('D:/pickles/processors.pkl', 'rb') as f:
     vis_processor, text_processor = pickle.load(f)
 
 # the model itself
+print('Loading model')
 model = torch.load("D:/marqo-gs-10m/model-saves/pretrain_1epoch.pt")
 model.eval()
+print('Done loading model')
 
 class ImageInput(BaseModel):
     image: str  # Base64-encoded string
@@ -88,4 +92,4 @@ if __name__ == "__main__":
     # Use this for debugging purposes only
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=9000, log_level="debug")
+    uvicorn.run(app, host="0.0.0.0", port=9001, log_level="debug")
