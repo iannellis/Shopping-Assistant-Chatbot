@@ -28,6 +28,8 @@ mediapipe = "^0.10.18"
 opencv-python = "^4.10.0.84"
 pympler = "^1.1"
 deepeval = "^2.0.5"
+fastapi = "^0.115.6"
+uvicorn = "^0.32.1"
 
 [[tool.poetry.source]]
 name = "pytorch-gpu-src"
