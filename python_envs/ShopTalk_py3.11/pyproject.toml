@@ -27,6 +27,7 @@ google-cloud-translate = "^3.18.0"
 mediapipe = "^0.10.18"
 opencv-python = "^4.10.0.84"
 pympler = "^1.1"
+deepeval = "^2.0.5"
 
 [[tool.poetry.source]]
 name = "pytorch-gpu-src"
