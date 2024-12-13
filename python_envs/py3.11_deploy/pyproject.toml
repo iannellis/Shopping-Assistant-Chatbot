@@ -15,6 +15,7 @@ torchaudio = {version = "^2.5.1+cu124", source = "pytorch-gpu-src"}
 transformers = "4.26.1"
 fastapi = "^0.115.6"
 uvicorn = "^0.32.1"
+numpy = "<2.0"
 
 [[tool.poetry.source]]
 name = "pytorch-gpu-src"
