@@ -16,6 +16,7 @@ transformers = "4.26.1"
 fastapi = "^0.115.6"
 uvicorn = "^0.32.1"
 numpy = "<2.0"
+antlr4-python3-runtime = "^4.11.0"
 
 [[tool.poetry.source]]
 name = "pytorch-gpu-src"
