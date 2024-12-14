@@ -1,3 +1,5 @@
+# Uses the 3.12 environment locally
+
 from check_image_category import load_listings, run_dataset_check, resume_dataset_check
 
 pdf = load_listings()

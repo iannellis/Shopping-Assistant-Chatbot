@@ -1,3 +1,5 @@
+# Uses the 3.11 environment locally
+
 from embeddings import run_embeddings
 
 import warnings
