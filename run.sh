@@ -7,8 +7,8 @@ declare -A MODELS
 
 # Array of BLIP-2 models mapping to their file names and Google Drive IDs
 MODELS["pretrain"]=("blip-2-pretrain.pt" "1xLfjTUf4MuBl1FeDpmClt04etF-PaZCZ")
-MODELS["gs"]=("blip-2-gs-trained-1epoch.pt", "1jsuiImeloqeQN99gULJbCZCHL8Q8mR92")
-MODELS["abo"]=("blip-2-abo-trained-2epochs.pt", "1kNkkk2Q6922a9oXQUol19hg16z_4JuE5")
+MODELS["gs"]=("blip-2-gs.pt", "1jsuiImeloqeQN99gULJbCZCHL8Q8mR92")
+MODELS["abo"]=("blip-2-abo.pt", "1kNkkk2Q6922a9oXQUol19hg16z_4JuE5")
 
 # ABO metadata Pandas dataframe file name and Google Drive ID
 ABO_METADATA_DF=("abo-listings-final-draft.pkl", "1hChAT7PL_3c9YQugQJFFOAElbRPV7yqg")
