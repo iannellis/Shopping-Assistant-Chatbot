@@ -5,7 +5,7 @@ WORKDIR /app
 COPY python_envs/py3.11_blip-2/requirements.txt /app/
 COPY assets/*.whl /app/
 COPY assets/blip-2-processors.pkl /app/
-COPY code/Blip-2_API_endpoint/app.py /app/
+COPY code/Blip-2_API_endpoint/* /app/
 
 RUN apt update
 RUN apt install software-properties-common -y
