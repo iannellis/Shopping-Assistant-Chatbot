@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "py3.12_llm_db"
+version = "0.1.0"
+description = ""
+authors = ["Ian Ellis <iellis@minevaluation.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.13"
+torch = "^2.5.1"
+torchvision = "^0.20.1"
+torchaudio = "^2.5.1"
+requests = "^2.32.3"
+transformers = "^4.46.3"
+accelerate = "^1.1.1"
+chromadb = "^0.5.23"
+fastapi = "^0.115.6"
+uvicorn = "^0.34.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
