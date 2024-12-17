@@ -2,6 +2,7 @@
 
 from fastapi import FastAPI, APIRouter
 from pydantic import BaseModel
+import os
 import base64
 from io import BytesIO
 from PIL import Image
@@ -21,7 +22,9 @@ with open('blip-2-processors.pkl', 'rb') as f:
 # the model itself
 print('Loading model')
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-model = torch.load("model-saves/pretrain_1epoch.pt")
+models_dir = os.environ["MODELS_DIR_CONTAINER"]
+model_selection = os.environ["BLIP_2_MODEL"]
+model = torch.load(models_dir + "/blip-2-" + model_selection + ".pt")
 model.to(device)
 model.eval()
 print('Done loading model')
