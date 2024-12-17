@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.6.3-devel-ubuntu24.04
+FROM nvidia/cuda:12.6.3-base-ubuntu24.04
 
 WORKDIR /app
 
@@ -17,6 +17,6 @@ RUN apt install python3-pip -y
 RUN python3.11 -m pip install *.whl 
 RUN python3.11 -m pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 9000
+EXPOSE $BLIP_2_PORT
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "9000"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "$BLIP_2_PORT"]
