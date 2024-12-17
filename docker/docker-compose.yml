@@ -36,7 +36,7 @@ services:
       context: ..
       dockerfile: docker/blip-2.dockerfile
     ports:
-      - ${BLIP_2_PORT}:${BLIP-2_PORT}
+      - ${BLIP_2_PORT}:${BLIP_2_PORT}
     volumes:
       - ${MODELS_DIR_LOCAL}:${MODELS_DIR_CONTAINER}:ro
     deploy:
