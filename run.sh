@@ -13,6 +13,9 @@ MODELS["abo"]=("blip-2-abo.pt", "1kNkkk2Q6922a9oXQUol19hg16z_4JuE5")
 # ABO metadata Pandas dataframe file name and Google Drive ID
 ABO_METADATA_DF=("abo-listings-final-draft.pkl", "1hChAT7PL_3c9YQugQJFFOAElbRPV7yqg")
 
+# ABO images
+ABO_IMAGES_FILE_NAME="abo-images-small.tar"
+
 # Ensure the selected model is valid
 if [ -z "${MODELS[$BLIP_2_MODEL]}" ]; then
     echo "Error: BLIP-2 Model '$BLIP_2_MODEL' is not defined. Please check your BLIP_2_MODEL in the .evn file."
@@ -50,7 +53,7 @@ cd "$MODEL_DIR_LOCAL"
 pip3 install gdown
 
 # For progress bars
-apt install pv
+apt install pv awscli
 
 # Get the filename and ID for the chosen model
 FILE_NAME="${MODELS[$BLIP_2_MODEL][0]}"
@@ -69,12 +72,11 @@ else
     echo "File '$FILE_NAME' for model '$BLIP_2_MODEL' already exists. Skipping download."
 fi
 
-# Get the ABO dataset
+# Get the ABO dataset images
 cd ${ABO_DIR_LOCAL}
-FILE_NAME="abo-images-small.tar"
 if [ ! -f "./$FILE_NAME" ]; then
     echo "File '$FILE_NAME' not found. Downloading..."
-    aws s3 cp s3://amazon-berkeley-objects/archives/$FILE_NAME ./$FILE_NAME
+    wget https://amazon-berkeley-objects.s3.amazonaws.com/archives/$ABO_IMAGES_FILE_NAME
     if [ $? -eq 0 ]; then
         echo "File '$FILE_NAME' downloaded successfully."
     else
