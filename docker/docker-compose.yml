@@ -1,0 +1,52 @@
+services:
+  ui:
+    build:
+      context: ..
+      dockerfile: docker/ui.dockerfile
+    ports:
+      - ${UI_PORT}:${UI_PORT}
+    depends_on:
+      llm_db:
+        condition: service_started
+
+  llm_db:
+    env_file: ".env"
+    build:
+      context: ..
+      dockerfile: docker/llm_db.dockerfile
+    ports:
+      - ${LLM_DB_PORT}:${LLM_DB_PORT}
+    volumes:
+      - ${MODELS_DIR_LOCAL}:${MODELS_DIR_CONTAINER}:ro
+      - ${ABO_DIR_LOCAL}:${ABO_DIR_CONTAINER}:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    depends_on:
+      blip_2:
+        condition: service_started
+
+  blip-2:
+    env_file: ".env"
+    build:
+      context: ..
+      dockerfile: docker/blip-2.dockerfile
+    ports:
+      - ${BLIP_2_PORT}:${BLIP-2_PORT}
+    volumes:
+      - ${MODELS_DIR_LOCAL}:${MODELS_DIR_CONTAINER}:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+
+
+
