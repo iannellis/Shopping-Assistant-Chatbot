@@ -27,7 +27,7 @@ services:
               count: 1
               capabilities: [gpu]
     depends_on:
-      blip_2:
+      blip-2:
         condition: service_started
 
   blip-2:
