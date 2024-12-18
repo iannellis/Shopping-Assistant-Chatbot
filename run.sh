@@ -43,6 +43,14 @@ else
     echo "Directory '$HF_LOCAL' already exists."
 fi
 
+# Check if the 'database' directory exists; create it if not
+if [ ! -d "$DB_LOCAL" ]; then
+    echo "Directory '$DB_LOCAL' does not exist. Creating it..."
+    mkdir "$DB_LOCAL"
+else
+    echo "Directory '$DB_LOCAL' already exists."
+fi
+
 # Check if the 'ABO dataset' directory exists; create it if not
 if [ ! -d "$ABO_DIR_LOCAL" ]; then
     echo "Directory '$ABO_DIR_LOCAL' does not exist. Creating it..."

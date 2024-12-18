@@ -18,6 +18,7 @@ services:
       - ${LLM_DB_PORT}:${LLM_DB_PORT}
     volumes:
       - ${HF_LOCAL}:${HF_HOME}
+      - ${DB_LOCAL}:${DB_CONTAINER}
       - ${ABO_DIR_LOCAL}:${ABO_DIR_CONTAINER}:ro
     deploy:
       resources:
