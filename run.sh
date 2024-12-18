@@ -1,33 +1,38 @@
 #!/bin/bash
 
-# Has variables we need
-source docker/.env
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
-declare -A MODELS
+# Has variables we need
+source $SCRIPT_DIR/docker/.env
+
+declare -A MODEL_FILES MODEL_GOOGLE_IDS
 
 # Array of BLIP-2 models mapping to their file names and Google Drive IDs
-MODELS["pretrain"]=("blip-2-pretrain.pt" "1xLfjTUf4MuBl1FeDpmClt04etF-PaZCZ")
-MODELS["gs"]=("blip-2-gs.pt", "1jsuiImeloqeQN99gULJbCZCHL8Q8mR92")
-MODELS["abo"]=("blip-2-abo.pt", "1kNkkk2Q6922a9oXQUol19hg16z_4JuE5")
+MODEL_FILES["pretrain"]="blip-2-pretrain.pt"
+MODEL_FILES["gs"]="blip-2-gs.pt"
+MODEL_FILES["abo"]="blip-2-abo.pt"
+MODEL_GOOGLE_IDS["pretrain"]="1xLfjTUf4MuBl1FeDpmClt04etF-PaZCZ"
+MODEL_GOOGLE_IDS["gs"]="1jsuiImeloqeQN99gULJbCZCHL8Q8mR92"
+MODEL_GOOGLE_IDS["abo"]="1kNkkk2Q6922a9oXQUol19hg16z_4JuE5"
 
 # ABO metadata Pandas dataframe file name and Google Drive ID
 ABO_METADATA_DF=("abo-listings-final-draft.pkl", "1hChAT7PL_3c9YQugQJFFOAElbRPV7yqg")
 
 # ABO images
-ABO_IMAGES_FILE_NAME="abo-images-small.tar"
+ABO_IMAGES=("abo-images-small.tar", "1wvEJbRL4hZ5de8Mm2sIvoZZ_frrl5MFl")
 
 # Ensure the selected model is valid
-if [ -z "${MODELS[$BLIP_2_MODEL]}" ]; then
-    echo "Error: BLIP-2 Model '$BLIP_2_MODEL' is not defined. Please check your BLIP_2_MODEL in the .evn file."
+if [ -z "${MODEL_FILES[$BLIP_2_MODEL]}" ]; then
+    echo "Error: BLIP-2 Model '$BLIP_2_MODEL' is not defined. Please check your BLIP_2_MODEL in the .env file."
     exit 1
 fi
 
 # Check if the 'models' directory exists; create it if not
-if [ ! -d "$MODEL_DIR_LOCAL" ]; then
-    echo "Directory '$MODEL_DIR_LOCAL' does not exist. Creating it..."
-    mkdir "$MODEL_DIR_LOCAL"
+if [ ! -d "$MODELS_DIR_LOCAL" ]; then
+    echo "Directory '$MODELS_DIR_LOCAL' does not exist. Creating it..."
+    mkdir "$MODELS_DIR_LOCAL"
 else
-    echo "Directory '$MODEL_DIR_LOCAL' already exists."
+    echo "Directory '$MODELS_DIR_LOCAL' already exists."
 fi
 
 # Check if the 'Hugging Face' directory exists; create it if not
@@ -46,74 +51,66 @@ else
     echo "Directory '$ABO_DIR_LOCAL' already exists."
 fi
 
-# Change to the 'models' directory
-cd "$MODEL_DIR_LOCAL"
+sudo apt update
 
 # For downloading models from Google Drive
-pip3 install gdown
+sudo apt install pipx -y
+pipx ensurepath
+source ~/.bashrc
+pipx install gdown
 
 # For progress bars
-apt install pv awscli
+sudo apt install pv -y
 
-# Get the filename and ID for the chosen model
-FILE_NAME="${MODELS[$BLIP_2_MODEL][0]}"
-FILE_ID="${MODELS[$BLIP_2_MODEL][1]}"
+# Check and download a file if it doesn't exist
+gdownload_file() {
+    local file_name=$1
+    local file_id=$2
 
-# Check and download the file if it doesn't exist
-if [ ! -f "$FILE_NAME" ]; then
-    echo "File '$FILE_NAME' for model '$BLIP_2_MODEL' not found. Downloading..."
-    gdown "$FILE_ID" -O "$FILE_NAME"
-    if [ $? -eq 0 ]; then
-        echo "File '$FILE_NAME' for model '$BLIP_2_MODEL' downloaded successfully."
+    if [ ! -f "$file_name" ]; then
+        echo "File '$file_name' not found. Downloading..."
+        ~/.local/bin/gdown "$file_id" -O "$file_name"
+        if [ $? -eq 0 ]; then
+            echo "File '$file_name' downloaded successfully."
+        else
+            echo "Error downloading '$file_name'."
+        fi
     else
-        echo "Error downloading file '$FILE_NAME' for model '$BLIP_2_MODEL'."
+        echo "File '$file_name' already exists. Skipping download."
     fi
-else
-    echo "File '$FILE_NAME' for model '$BLIP_2_MODEL' already exists. Skipping download."
-fi
+}
 
-# Get the ABO dataset images
-cd ${ABO_DIR_LOCAL}
-if [ ! -f "./$FILE_NAME" ]; then
-    echo "File '$FILE_NAME' not found. Downloading..."
-    wget https://amazon-berkeley-objects.s3.amazonaws.com/archives/$ABO_IMAGES_FILE_NAME
-    if [ $? -eq 0 ]; then
-        echo "File '$FILE_NAME' downloaded successfully."
-    else
-        echo "Error downloading file '$FILE_NAME' for model '$FILE_NAME'."
-    fi
-else
-    echo "File '$FILE_NAME' already exists. Skipping download."
-fi
+# Download the model file
+cd "$MODELS_DIR_LOCAL"
+gdownload_file "${MODEL_FILES[$BLIP_2_MODEL]}" "${MODEL_GOOGLE_IDS[$BLIP_2_MODEL]}"
+
+# Get the ABO dataset processed metadata
+cd "$ABO_DIR_LOCAL"
+gdownload_file "${ABO_METADATA_DF[0]}" "${ABO_METADATA_DF[1]}"
+
+# Get the ABO dataset images and extract them
+gdownload_file "${ABO_IMAGES[0]}" "${ABO_IMAGES[1]}"
 
 if [ ! -d "images" ]; then
     echo "Extracting abo-images-small.tar..."
-    pv "$FILE_NAME" | tar -xf-
+    pv "${ABO_IMAGES[0]}" | tar -xf-
 fi
 
-if [ -f "images/metadata/listings/images.csv.gz" ] && [ ! -f "images/metadata/listings/images.csv.gz" ]; then
+if [ -f "images/metadata/images.csv.gz" ] && [ ! -f "images/metadata/images.csv" ]; then
     echo "Extracting image metadata..."
-    gunzip "images/metadata/listings/images.csv.gz"
+    gunzip "images/metadata/images.csv.gz"
 fi
 
-# The processed metadata
-FILE_NAME="${ABO_METADATA_DF[0]}"
-FILE_ID="${ABO_METADATA_DF[1]}"
-
-if [ ! -f "$FILE_NAME"]; then
-    echo "File '$FILE_NAME' not found. Downloading..."
-    gdown "$FILE_ID" -O "$FILE_NAME"
-    if [ $? -eq 0 ]; then
-        echo "File '$FILE_NAME' downloaded successfully."
-    else
-        echo "Error downloading file '$FILE_NAME'."
-    fi
+# install or refresh Docker
+if ! snap list | grep -q docker; then
+    echo "Docker is not installed. Installing via Snap..."
+    sudo snap install docker
 else
-    echo "File '$FILE_NAME' already exists. Skipping download."
+    echo "Docker is installed. Refreshing..."
+    sudo snap refresh docker
 fi
 
 # build and run the docker system
-SCRIPT_DIR=$(dirname "$(realpath "$0")")
 cd "$SCRIPT_DIR"
 docker compose -f docker/docker-compose.yml build
 docker compose -f docker/docker-compose.yml up
