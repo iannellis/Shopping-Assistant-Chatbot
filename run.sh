@@ -101,14 +101,14 @@ if [ -f "images/metadata/images.csv.gz" ] && [ ! -f "images/metadata/images.csv"
     gunzip "images/metadata/images.csv.gz"
 fi
 
-# install or refresh Docker
-if ! snap list | grep -q docker; then
-    echo "Docker is not installed. Installing via Snap..."
-    sudo snap install docker
-else
-    echo "Docker is installed. Refreshing..."
-    sudo snap refresh docker
+# install Docker via apt
+if snap list | grep -q docker; then
+    echo "Docker is installed via Snap. Will not work with CUDA. Uninstalling..."
+    sudo snap remove --purge docker
 fi
+
+echo "Installing Docker via apt so it works with CUDA..."
+sudo apt install docker.io docker-compose-v2 -y
 
 # build and run the docker system
 cd "$SCRIPT_DIR"
