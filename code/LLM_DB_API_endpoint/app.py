@@ -16,6 +16,7 @@ def root() -> dict:
     return {"msg": "You can use this endpoint to interact with the LLM."}
 
 app.include_router(api_router, prefix="/api/v1")
+print('LLM and DB endpoint up and running.')
 
 if __name__ == "__main__":
     # Use this for debugging purposes only
