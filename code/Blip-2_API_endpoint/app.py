@@ -20,14 +20,14 @@ with open('blip-2-processors.pkl', 'rb') as f:
     vis_processor, text_processor = pickle.load(f)
 
 # the model itself
-print('Loading model')
+print('Loading BLIP-2 model')
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 models_dir = os.environ["MODELS_DIR_CONTAINER"]
 model_selection = os.environ["BLIP_2_MODEL"]
 model = torch.load(models_dir + "/blip-2-" + model_selection + ".pt")
 model.to(device)
 model.eval()
-print('Done loading model')
+print('Done loading BLIP-2 model.')
 
 class ImageInput(BaseModel):
     image: str  # Base64-encoded string
@@ -51,7 +51,7 @@ def root() -> dict:
     """
     return {"msg": "You can use this endpoint to get BLIP-2 embeddings."}
 
-@api_router.post("/embed_image/", status_code=201)
+@api_router.post("/embed_image", status_code=201)
 async def embed_image(*, input: ImageInput) -> dict:
     """
     Get image embeddings
@@ -91,7 +91,7 @@ async def embed_multimodal(input: MultimodalInput):
     return {"embedding": embedding}
 
 app.include_router(api_router, prefix="/api/v1")
-
+print('BLIP-2 endpoint up and running.')
 
 if __name__ == "__main__":
     # Use this for debugging purposes only
