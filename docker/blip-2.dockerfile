@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.6.3-base-ubuntu24.04
+FROM nvidia/cuda:12.6.3-cudnn-runtime-ubuntu24.04
 
 WORKDIR /app
 
@@ -19,4 +19,4 @@ RUN python3.11 -m pip install --no-cache-dir -r requirements.txt
 
 EXPOSE $BLIP_2_PORT
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "$BLIP_2_PORT"]
+CMD uvicorn app:app --host 0.0.0.0 --port $BLIP_2_PORT

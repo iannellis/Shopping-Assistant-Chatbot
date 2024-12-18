@@ -9,4 +9,4 @@ RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
 EXPOSE $UI_PORT
 
-CMD ["streamlit", "run", "st-ui.py", "--server.port", "$LLM_UI_PORT"]
+CMD streamlit run st-ui.py --server.port $UI_PORT
