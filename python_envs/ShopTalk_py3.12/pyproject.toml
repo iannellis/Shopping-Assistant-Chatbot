@@ -27,6 +27,9 @@ datasets = {extras = ["vision"], version = "^3.1.0"}
 open-clip-torch = "^2.29.0"
 deepeval = "^2.0.5"
 lm-format-enforcer = "^0.10.9"
+langchain-huggingface = "^0.1.2"
+langchain-chroma = "^0.1.4"
+langchain-community = "^0.3.13"
 
 [[tool.poetry.source]]
 name = "pytorch-gpu-src"
