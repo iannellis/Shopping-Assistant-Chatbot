@@ -31,6 +31,7 @@ langchain-huggingface = "^0.1.2"
 langchain-chroma = "^0.1.4"
 langchain-community = "^0.3.13"
 bs4 = "^0.0.2"
+langgraph = "^0.2.60"
 
 [[tool.poetry.source]]
 name = "pytorch-gpu-src"
