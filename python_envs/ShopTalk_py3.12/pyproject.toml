@@ -13,7 +13,7 @@ torch = {version = "^2.5.1+cu124", source = "pytorch-gpu-src"}
 torchvision = {version = "^0.20.1+cu124", source = "pytorch-gpu-src"}
 torchaudio = {version = "^2.5.1+cu124", source = "pytorch-gpu-src"}
 requests = "^2.32.3"
-transformers = "^4.46.3"
+transformers = "^4.47.0"
 iprogress = "^0.4"
 accelerate = "^1.1.1"
 bitsandbytes = "^0.44.1"
@@ -30,6 +30,7 @@ lm-format-enforcer = "^0.10.9"
 langchain-huggingface = "^0.1.2"
 langchain-chroma = "^0.1.4"
 langchain-community = "^0.3.13"
+bs4 = "^0.0.2"
 
 [[tool.poetry.source]]
 name = "pytorch-gpu-src"
