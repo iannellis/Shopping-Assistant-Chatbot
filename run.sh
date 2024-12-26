@@ -35,20 +35,20 @@ else
     echo "Directory '$MODELS_DIR_LOCAL' already exists."
 fi
 
-# Check if the 'Hugging Face' directory exists; create it if not
-if [ ! -d "$HF_LOCAL" ]; then
-    echo "Directory '$HF_LOCAL' does not exist. Creating it..."
-    mkdir "$HF_LOCAL"
+# Check if the 'OLlama' directory exists; create it if not
+if [ ! -d "$OLLAMA_DIR_LOCAL" ]; then
+    echo "Directory '$OLLAMA_DIR_LOCAL' does not exist. Creating it..."
+    mkdir "$OLLAMA_DIR_LOCAL"
 else
-    echo "Directory '$HF_LOCAL' already exists."
+    echo "Directory '$OLLAMA_DIR_LOCAL' already exists."
 fi
 
 # Check if the 'database' directory exists; create it if not
-if [ ! -d "$DB_LOCAL" ]; then
-    echo "Directory '$DB_LOCAL' does not exist. Creating it..."
-    mkdir "$DB_LOCAL"
+if [ ! -d "$CHROMA_DIR_LOCAL" ]; then
+    echo "Directory '$CHROMA_DIR_LOCAL' does not exist. Creating it..."
+    mkdir "$CHROMA_DIR_LOCAL"
 else
-    echo "Directory '$DB_LOCAL' already exists."
+    echo "Directory '$CHROMA_DIR_LOCAL' already exists."
 fi
 
 # Check if the 'ABO dataset' directory exists; create it if not
