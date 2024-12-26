@@ -15,7 +15,6 @@ services:
       context: ..
       dockerfile: docker/agent.dockerfile
     volumes:
-      - ${HF_DIR_LOCAL}:${HF_HOME}
       - ${ABO_DIR_LOCAL}:${ABO_DIR_CONTAINER}:ro
     deploy:
       resources:
@@ -56,6 +55,7 @@ services:
     image: ollama/ollama
     volumes:
       - ${OLLAMA_LOCAL}:/root/.ollama
+    command: /bin/ollama pull ${OLLAMA_MODEL} && /bin/ollama serve
     deploy:
       resources:
         reservations:
