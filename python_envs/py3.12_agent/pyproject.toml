@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "py3.12_llm_db"
+name = "py3.12_agent"
 version = "0.1.0"
 description = ""
 authors = ["Ian Ellis <iellis@minevaluation.com>"]
@@ -8,13 +8,12 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
-torch = "^2.5.1"
 requests = "^2.32.3"
-transformers = "^4.46.3"
-accelerate = "^1.1.1"
-chromadb = "^0.5.23"
 fastapi = "^0.115.6"
 uvicorn = "^0.34.0"
+langchain-chroma = "^0.1.4"
+langchain-ollama = "^0.2.2"
+langgraph = "^0.2.60"
 
 [build-system]
 requires = ["poetry-core"]
