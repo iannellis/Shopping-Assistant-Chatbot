@@ -6,16 +6,14 @@ services:
     ports:
       - ${UI_PORT}:${UI_PORT}
     depends_on:
-      llm_db:
+      agent:
         condition: service_started
 
-  llm_db:
+  agent:
     env_file: ".env"
     build:
       context: ..
-      dockerfile: docker/llm_db.dockerfile
-    ports:
-      - ${LLM_DB_PORT}:${LLM_DB_PORT}
+      dockerfile: docker/agent.dockerfile
     volumes:
       - ${HF_LOCAL}:${HF_HOME}
       - ${DB_LOCAL}:${DB_CONTAINER}
@@ -30,16 +28,28 @@ services:
     depends_on:
       blip-2:
         condition: service_started
+      ollama:
+        condition: service_started
 
   blip-2:
     env_file: ".env"
     build:
       context: ..
       dockerfile: docker/blip-2.dockerfile
-    ports:
-      - ${BLIP_2_PORT}:${BLIP_2_PORT}
     volumes:
       - ${MODELS_DIR_LOCAL}:${MODELS_DIR_CONTAINER}:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  ollama:
+    image: ollama/ollama
+    volumes:
+      - ${OLLAMA_LOCAL}:/root/.ollama
     deploy:
       resources:
         reservations:
