@@ -15,8 +15,7 @@ services:
       context: ..
       dockerfile: docker/agent.dockerfile
     volumes:
-      - ${HF_LOCAL}:${HF_HOME}
-      - ${DB_LOCAL}:${DB_CONTAINER}
+      - ${HF_DIR_LOCAL}:${HF_HOME}
       - ${ABO_DIR_LOCAL}:${ABO_DIR_CONTAINER}:ro
     deploy:
       resources:
@@ -30,6 +29,13 @@ services:
         condition: service_started
       ollama:
         condition: service_started
+      chroma:
+        condition: service_started
+
+  chroma:
+    image: chromadb/chroma
+    volumes: 
+      - ${CHROMA_DIR_LOCAL}:/chroma/chroma
 
   blip-2:
     env_file: ".env"
