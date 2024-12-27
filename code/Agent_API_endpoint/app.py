@@ -11,6 +11,7 @@ from langchain_ollama import ChatOllama
 from httpx import ConnectError
 import chromadb
 from time import sleep
+import requests
 
 from fastapi import FastAPI, APIRouter
 from pydantic import BaseModel
@@ -40,10 +41,44 @@ while not chroma_client:
         sleep(2)
 
 blip_2_model = os.environ["BLIP_2_MODEL"]
+max_images_per_item = os.environ["CHROMA_MAX_IMAGES_PER_ITEM"]
+max_items = os.environ["CHROMA_MAX_ITEMS"]
 vectorstore = Chroma(collection_name='blip_2_'+blip_2_model, client=chroma_client)
-retriever = vectorstore.as_retriever(search_kwargs = {"k": 3})
+retriever = vectorstore.as_retriever(search_kwargs = {"k": max_items * max_images_per_item})
 
-app = FastAPI(title='BLIP-2 embeddings', openapi_url="/openapi.json")
+# Wait for BLIP-2 connection
+blip_2_port = os.environ["BLIP_2_PORT"]
+blip_2_url = "http://blip-2:" + blip_2_port + '/api/v1/'
+response = None
+while not response:
+    try:
+        response = requests.get(blip_2_url, timeout=5)
+    except requests.ReadTimeout:
+        print('Blip-2 endpoint does not appear to be running yet. Retrying')
+
+
+def encode_image(image: bytes) -> str:
+    """Encode raw image using base64"""
+    return base64.b64encode(image)
+
+def blip_2_encode(image: None, text: None) -> list | None:
+    """Embed images and text using the BLIP-2 API endpoint"""
+    if not image and not text:
+        return
+    
+    if image:
+        encoded_image = encode_image(image)
+    
+    if image and not text:
+        response = requests.post(blip_2_url+'embed_image', json={'image': encoded_image})  
+    elif not image and text:
+        response = requests.post(blip_2_url+'embed_text', json={'text': text})
+    else:
+        response = requests.post(blip_2_url+'embed_multimodal', json={'image': encode_image, 'text': text})
+    
+    return response.json()['embedding']
+
+app = FastAPI(title='ShopTalk Agent', openapi_url="/openapi.json")
 api_router = APIRouter()
 
 @api_router.get("/", status_code=200)
