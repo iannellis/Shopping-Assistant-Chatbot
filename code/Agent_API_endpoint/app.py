@@ -1,5 +1,4 @@
 # Use the 3.12 environment
-from langchain_chroma import Chroma
 from langchain_core.messages import SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import tool
@@ -43,8 +42,7 @@ while not chroma_client:
 blip_2_model = os.environ["BLIP_2_MODEL"]
 max_images_per_item = os.environ["CHROMA_MAX_IMAGES_PER_ITEM"]
 max_items = os.environ["CHROMA_MAX_ITEMS"]
-vectorstore = Chroma(collection_name='blip_2_'+blip_2_model, client=chroma_client)
-retriever = vectorstore.as_retriever(search_kwargs = {"k": max_items * max_images_per_item})
+chroma_collection = chroma_client.get_collection(name='blip_2_'+blip_2_model)
 
 # Wait for BLIP-2 connection
 blip_2_port = os.environ["BLIP_2_PORT"]
