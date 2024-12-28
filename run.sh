@@ -15,6 +15,13 @@ MODEL_GOOGLE_IDS["pretrain"]="1xLfjTUf4MuBl1FeDpmClt04etF-PaZCZ"
 MODEL_GOOGLE_IDS["gs"]="1jsuiImeloqeQN99gULJbCZCHL8Q8mR92"
 MODEL_GOOGLE_IDS["abo"]="1kNkkk2Q6922a9oXQUol19hg16z_4JuE5"
 
+CHROMA_FILES["pretrain"]="chroma_pretrain.tar"
+CHROMA_FILES["gs"]="chroma_gs.tar"
+CHROMA_FILES["abo"]="chroma_abo.tar"
+CHROMA_GOOGLE_IDS["pretrain"]="11a_5nejd7MwjvuQV0ycoOqHuC7Lhzhto"
+CHROMA_GOOGLE_IDS["gs"]="11a94E7pJ8AYtflRBicLkkpNFbQr7H_tk"
+CHROMA_GOOGLE_IDS["abo"]="11V6YfofjtZglnKp9Ymk65w23BphDUTIW"
+
 # ABO metadata Pandas dataframe file name and Google Drive ID
 ABO_METADATA_DF=("abo-listings-final-draft.pkl", "1hChAT7PL_3c9YQugQJFFOAElbRPV7yqg")
 
@@ -91,6 +98,15 @@ gdownload_file() {
 # Download the model file
 cd "$MODELS_DIR_LOCAL"
 gdownload_file "${MODEL_FILES[$BLIP_2_MODEL]}" "${MODEL_GOOGLE_IDS[$BLIP_2_MODEL]}"
+
+# Download the Chroma database and extract it
+cd "$CHROMA_DIR_LOCAL"
+gdownload_file "${CHROMA_FILES[$BLIP_2_MODEL]}" "${CHROMA_GOOGLE_IDS[$BLIP_2_MODEL]}"
+
+if [ ! -f "chroma.sqlite3" ]; then
+    echo "Extracting Chroma database..."
+    tar -xf "${CHROMA_FILES[$BLIP_2_MODEL]}"
+fi
 
 # Get the ABO dataset processed metadata
 cd "$ABO_DIR_LOCAL"
