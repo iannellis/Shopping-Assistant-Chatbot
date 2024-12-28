@@ -24,6 +24,7 @@ class Chroma_Collection_Connection():
         max_items = os.environ["CHROMA_MAX_ITEMS"]
         n_return = max_items * max_images_per_item
         
+        # wait for Chroma to come online
         client = None
         while not client:
             try:
@@ -139,12 +140,14 @@ class ABO_Dataset():
         return abo_meta
     
     def _get_b64_encoded_image(self, image_id: str):
+        """Encode the image as b64 for passing around via LangGraph."""
         fpath = self.abo_image_dir + self.abo_image_meta.loc[image_id, 'path']
         with open(fpath, 'rb') as f:
             image_bytes = f.read()
         return base64.b64encode(image_bytes)
     
     def _get_item_as_str(self, item_id: str):
+        """Get the row of data and convert it to a string consumable by an LLM."""
         row = self.abo_meta[item_id]
         row_filtered = row.dropna()
         text = []
