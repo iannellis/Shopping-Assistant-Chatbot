@@ -139,6 +139,16 @@ class ABO_Dataset():
                             'item_keywords', 'bullet_point']]
         return abo_meta
     
+    def get_image_item_pairs_data(self, pairs: list[Image_Item_Pair_IDs]) -> list[Image_Item_Pair_Data]:
+        """Loop through the image_id and item_id pairs and get the image incoded in b64
+        and the item data as a string."""
+        image_item_pairs_data = []
+        for image_id, item_id in pairs:
+            image_b64 = self._get_b64_encoded_image(image_id) if image_id else None
+            item_str = self._get_item_as_str(item_id)
+            image_item_pairs_data.append(Image_Item_Pair_Data(image_b64=image_b64, item_str=item_str))
+        return image_item_pairs_data    
+    
     def _get_b64_encoded_image(self, image_id: str):
         """Encode the image as b64 for passing around via LangGraph."""
         fpath = self.abo_image_dir + self.abo_image_meta.loc[image_id, 'path']
@@ -159,14 +169,3 @@ class ABO_Dataset():
             text.append('}')
             text.append('; ')
         return ''.join(text)
-    
-    def get_image_item_pairs_data(self, pairs: list[Image_Item_Pair_IDs]) -> list[Image_Item_Pair_Data]:
-        """Loop through the image_id and item_id pairs and get the image incoded in b64
-        and the item data as a string."""
-        image_item_pairs_data = []
-        for image_id, item_id in pairs:
-            image_b64 = self._get_b64_encoded_image(image_id) if image_id else None
-            item_str = self._get_item_as_str(item_id)
-            image_item_pairs_data.append(Image_Item_Pair_Data(image_b64=image_b64, item_str=item_str))
-        return image_item_pairs_data
-                
