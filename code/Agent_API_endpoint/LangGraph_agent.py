@@ -55,7 +55,7 @@ class Agent():
         In any other circumstance, call with an empty string: ''."""
         if isinstance(query, str):
             if not query:
-                # dirty hack
+                # streaming dirty hack
                 return '', []
             match_ids = self.chroma_collection.query_image_text(image_b64=None, text=query)
         elif isinstance(query, dict):
@@ -72,7 +72,7 @@ class Agent():
         for i, pair in enumerate(image_item_pairs_data):
             images_b64.append(pair.image_b64)
             product_data.append('Item ' + str(i) + ': ' + pair.item_str)
-        return '\n'.join(product_data), images_b64
+        return '\n\n'.join(product_data), images_b64
             
     # Step 1: Generate an AIMessage that may include a tool-call to be sent.
     def _query_or_respond(self, state: MessagesState):
@@ -128,8 +128,6 @@ class Agent():
         
         return {"messages": [response]}
 
-
-
     # Step 3: Generate a response using the retrieved content.
     def _generate(self, state: MessagesState):
         """Generate answer."""
@@ -142,29 +140,33 @@ class Agent():
                 break
         tool_messages = recent_tool_messages[::-1]
 
-        # Format into prompt
-        docs_content = "\n\n".join(doc.content for doc in tool_messages)
-        system_message_content = (
-            'You are being provided an enumerated list of products related to the prompt '
-            'the user provided. Briefly tell the user that you found some information '
-            'related to their query. Then, enumerating each product, provide its name '
-            'and a one-sentence summary. For example:\n'
-            '   1. The best ketchup in the world\n'
-            '      Use this to make that bland food taste great!\n'
-            '\n'
-            '   2. World’s biggest pumpkin\n'
-            '      Make your Halloween awesome.\n'
-            '\n'
-            'Here is the product information:\n'
-            f'{docs_content}'
-        )
         conversation_messages = [
             message
             for message in state["messages"]
             if message.type in ("human", "system")
             or (message.type == "ai" and not message.tool_calls)
         ]
-        prompt = [SystemMessage(system_message_content)] + conversation_messages
+
+        # Format into prompt
+        docs_content = "\n\n".join(doc.content for doc in tool_messages)
+        if docs_content:
+            system_message_content = (
+                'You are being provided an enumerated list of products related to the prompt '
+                'the user provided. Briefly tell the user that you found some information '
+                'related to their query. Then, enumerating each product, provide its name '
+                'and a one-sentence summary. For example:\n'
+                '   1. The best ketchup in the world\n'
+                '      Use this to make that bland food taste great!\n'
+                '\n'
+                '   2. World’s biggest pumpkin\n'
+                '      Make your Halloween awesome.\n'
+                '\n'
+                'Here is the product information:\n'
+                f'{docs_content}'
+            )
+            prompt = [SystemMessage(system_message_content)] + conversation_messages
+        else: # more streaming dirty hack
+            prompt = conversation_messages
 
         # Run
         response = self.llm.invoke(prompt)
