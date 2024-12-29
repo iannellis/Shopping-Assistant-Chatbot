@@ -7,7 +7,7 @@ from langgraph.checkpoint.memory import MemorySaver
 
 from util import Chroma_Collection_Connection, connect_ollama_llm, ABO_Dataset
 
-from typing import Iterator
+from typing import AsyncGenerator
 
 class Agent():
     """The LangGraph agent, which takes a user's query, retrieves relevant product
@@ -31,7 +31,7 @@ class Agent():
         self.abo_dataset = ABO_Dataset()
         self.graph = self._build_graph()
     
-    def prompt(self, chat_id: str, prompt: str="", image_b64: str=None) -> Iterator:
+    async def prompt(self, chat_id: str, prompt: str="", image_b64: str=None):
         config = {"configurable": {"thread_id": chat_id}}
 
         input_message = {
@@ -42,7 +42,11 @@ class Agent():
         if image_b64:
             input_message["image_b64"] = image_b64
 
-        return self.graph.stream({"messages": [input_message]}, stream_mode="messages", config=config)
+        for message, metadata in self.graph.stream({"messages": [input_message]}, stream_mode="messages", config=config):
+            if metadata['langgraph_node']=='tools' and message.artifact:
+                yield {"images": message.artifact, "text": ""}
+            if metadata['langgraph_node']=='generate':
+                yield {"Images": [], "text": message.content}
     
     @tool(response_format="content_and_artifact")
     def _retrieve_products(self, query: str | dict):
@@ -172,18 +176,18 @@ class Agent():
         
         # Compile application and test
         graph_builder = StateGraph(MessagesState)
-        graph_builder.add_node(self._query_or_respond)
-        graph_builder.add_node(tools)
-        graph_builder.add_node(self._generate)
+        graph_builder.add_node("query_or_respond", self._query_or_respond)
+        graph_builder.add_node("tools", tools)
+        graph_builder.add_node("generate", self._generate)
 
-        graph_builder.set_entry_point("_query_or_respond")
+        graph_builder.set_entry_point("query_or_respond")
         graph_builder.add_conditional_edges(
-            "_query_or_respond",
+            "query_or_respond",
             tools_condition,
             {END: END, "tools": "tools"},
         )
-        graph_builder.add_edge("tools", "_generate")
-        graph_builder.add_edge("_generate", END)
+        graph_builder.add_edge("tools", "generate")
+        graph_builder.add_edge("generate", END)
 
         memory = MemorySaver()
         return graph_builder.compile(checkpointer=memory)
