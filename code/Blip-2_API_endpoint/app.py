@@ -52,7 +52,7 @@ def root() -> dict:
     return {"msg": "You can use this endpoint to get BLIP-2 embeddings."}
 
 @api_router.post("/embed_image", status_code=201)
-async def embed_image(*, input: ImageInput) -> dict:
+async def embed_image(input: ImageInput) -> dict:
     """
     Get image embeddings
     """
