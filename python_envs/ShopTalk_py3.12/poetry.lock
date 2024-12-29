@@ -1853,6 +1853,23 @@ files = [
 pyreadline3 = {version = "*", markers = "sys_platform == \"win32\" and python_version >= \"3.8\""}
 
 [[package]]
+name = "icecream"
+version = "2.1.3"
+description = "Never use print() to debug again; inspect variables, expressions, and program execution with a single, simple function call."
+optional = false
+python-versions = "*"
+files = [
+    {file = "icecream-2.1.3-py2.py3-none-any.whl", hash = "sha256:757aec31ad4488b949bc4f499d18e6e5973c40cc4d4fc607229e78cfaec94c34"},
+    {file = "icecream-2.1.3.tar.gz", hash = "sha256:0aa4a7c3374ec36153a1d08f81e3080e83d8ac1eefd97d2f4fe9544e8f9b49de"},
+]
+
+[package.dependencies]
+asttokens = ">=2.0.1"
+colorama = ">=0.3.9"
+executing = ">=0.3.1"
+pygments = ">=2.2.0"
+
+[[package]]
 name = "idna"
 version = "3.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -7184,4 +7201,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12,<3.13"
-content-hash = "6f99915d35eaf374868fb4796211989a9374868676cf2014f0c5ab3b116de117"
+content-hash = "343a2e4f5b40cb7a63a02e8df31daf080c12a2a51d5538d71cfb28a1d7955563"
