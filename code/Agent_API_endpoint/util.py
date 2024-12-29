@@ -154,7 +154,7 @@ class ABO_Dataset():
         fpath = self.abo_image_dir + self.abo_image_meta.loc[image_id, 'path']
         with open(fpath, 'rb') as f:
             image_bytes = f.read()
-        return base64.b64encode(image_bytes)
+        return base64.b64encode(image_bytes).decode("utf-8")
     
     def _get_item_as_str(self, item_id: str):
         """Get the row of data and convert it to a string consumable by an LLM."""
