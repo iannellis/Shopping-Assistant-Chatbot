@@ -35,11 +35,11 @@ if [ -z "${MODEL_FILES[$BLIP_2_MODEL]}" ]; then
 fi
 
 # Check if the 'models' directory exists; create it if not
-if [ ! -d "$MODELS_DIR_LOCAL" ]; then
-    echo "Directory '$MODELS_DIR_LOCAL' does not exist. Creating it..."
-    mkdir "$MODELS_DIR_LOCAL"
+if [ ! -d "$BLIP_2_DIR_LOCAL" ]; then
+    echo "Directory '$BLIP_2_DIR_LOCAL' does not exist. Creating it..."
+    mkdir "$BLIP_2_DIR_LOCAL"
 else
-    echo "Directory '$MODELS_DIR_LOCAL' already exists."
+    echo "Directory '$BLIP_2_DIR_LOCAL' already exists."
 fi
 
 # Check if the 'OLlama' directory exists; create it if not
@@ -96,7 +96,7 @@ gdownload_file() {
 }
 
 # Download the model file
-cd "$MODELS_DIR_LOCAL"
+cd "$BLIP_2_DIR_LOCAL"
 gdownload_file "${MODEL_FILES[$BLIP_2_MODEL]}" "${MODEL_GOOGLE_IDS[$BLIP_2_MODEL]}"
 
 # Download the Chroma database and extract it

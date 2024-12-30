@@ -42,7 +42,7 @@ services:
       context: ..
       dockerfile: docker/blip-2.dockerfile
     volumes:
-      - ${MODELS_DIR_LOCAL}:${MODELS_DIR_CONTAINER}:ro
+      - ${BLIP_2_DIR_LOCAL}:${BLIP_2_DIR_CONTAINER}:ro
     deploy:
       resources:
         reservations:
