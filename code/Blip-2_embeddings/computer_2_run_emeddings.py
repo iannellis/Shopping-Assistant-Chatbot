@@ -16,3 +16,7 @@ run_embeddings(abo_dataset_dir='/mnt/d/abo-dataset', model_type='abo',
 print('\n\nRunning pretrained embeddings\n\n')
 run_embeddings(abo_dataset_dir='/mnt/d/abo-dataset', model_type='pretrain', 
                    device='cuda', save_path='/mnt/d/embeddings', batch_size=64)
+
+print('\n\nRunning coco embeddings\n\n')
+run_embeddings(abo_dataset_dir='/mnt/d/abo-dataset', model_type='coco', 
+                   device='cuda', save_path='/mnt/d/embeddings', batch_size=32)
