@@ -7,8 +7,6 @@ from langgraph.checkpoint.memory import MemorySaver
 
 from util import Chroma_Collection_Connection, connect_ollama_llm, ABO_Dataset
 
-from typing import AsyncGenerator
-
 class Agent():
     """The LangGraph agent, which takes a user's query, retrieves relevant product
     information, and uses that information to respond to a user's queries.
