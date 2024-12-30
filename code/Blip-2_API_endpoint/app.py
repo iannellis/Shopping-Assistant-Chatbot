@@ -22,7 +22,7 @@ with open('blip-2-processors.pkl', 'rb') as f:
 # the model itself
 print('Loading BLIP-2 model')
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-models_dir = os.environ["MODELS_DIR_CONTAINER"]
+models_dir = os.environ["BLIP_2_DIR_CONTAINER"]
 model_selection = os.environ["BLIP_2_MODEL"]
 model = torch.load(models_dir + "/blip-2-" + model_selection + ".pt")
 model.to(device)
