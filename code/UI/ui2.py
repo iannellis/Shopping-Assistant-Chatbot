@@ -4,7 +4,6 @@ from PIL import Image
 import io
 import json
 import base64
-from icecream import ic
 import os
 
 agent_endpoint = "http://agent:" + os.environ["AGENT_PORT"] + "/api/v1/prompt"
