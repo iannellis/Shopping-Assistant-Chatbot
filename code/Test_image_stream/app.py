@@ -22,7 +22,7 @@ async def root() -> dict:
         pre_json_line = {"images": encoded_images, "text": ""}
         yield json.dumps(pre_json_line) + "\n"
         # Send subsequent text tokens
-        tokens = ["Hello, ", "world! ", "This ", "is ", "a ", "streaming", " ", "response."]
+        tokens = ["**Hello, ", "world!**\\n", "This ", "is ", "a ", "streaming", " ", "response."]
         for token in tokens:
             yield f'{{"images": [], "text": "{token}"}}\n'
             await asyncio.sleep(0.5)
