@@ -16,14 +16,19 @@ app = FastAPI(title='BLIP-2 embeddings', openapi_url="/openapi.json")
 api_router = APIRouter()
 
 # the (eval) preprocessors for the model
-with open('blip-2-processors.pkl', 'rb') as f:
-    vis_processor, text_processor = pickle.load(f)
+model_selection = os.environ["BLIP_2_MODEL"]
+if model_selection == 'coco':
+    with open('blip-2-processors-coco.pkl', 'rb') as f:
+        vis_processor, text_processor = pickle.load(f)
+else:
+    with open('blip-2-processors-pretrain.pkl', 'rb') as f:
+        vis_processor, text_processor = pickle.load(f)
 
 # the model itself
-print('Loading BLIP-2 model')
+
+print('Loading BLIP-2 model ' + model_selection)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 models_dir = os.environ["BLIP_2_DIR_CONTAINER"]
-model_selection = os.environ["BLIP_2_MODEL"]
 model = torch.load(models_dir + "/blip-2-" + model_selection + ".pt")
 model.to(device)
 model.eval()
