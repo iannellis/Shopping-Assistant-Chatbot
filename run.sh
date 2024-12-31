@@ -11,16 +11,20 @@ declare -A MODEL_FILES MODEL_GOOGLE_IDS
 MODEL_FILES["pretrain"]="blip-2-pretrain.pt"
 MODEL_FILES["gs"]="blip-2-gs.pt"
 MODEL_FILES["abo"]="blip-2-abo.pt"
+MODEL_FILES["coco"]="blip-2-coco.pt"
 MODEL_GOOGLE_IDS["pretrain"]="1xLfjTUf4MuBl1FeDpmClt04etF-PaZCZ"
 MODEL_GOOGLE_IDS["gs"]="1jsuiImeloqeQN99gULJbCZCHL8Q8mR92"
 MODEL_GOOGLE_IDS["abo"]="1kNkkk2Q6922a9oXQUol19hg16z_4JuE5"
+MODEL_GOOGLE_IDS["coco"]="15CuzLdzyhORtVFMLhuKZ16E50ENJavY4"
 
 CHROMA_FILES["pretrain"]="chroma_pretrain.tar"
 CHROMA_FILES["gs"]="chroma_gs.tar"
 CHROMA_FILES["abo"]="chroma_abo.tar"
+CHROMA_FILES["coco"]="chroma_coco.tar"
 CHROMA_GOOGLE_IDS["pretrain"]="11a_5nejd7MwjvuQV0ycoOqHuC7Lhzhto"
 CHROMA_GOOGLE_IDS["gs"]="11a94E7pJ8AYtflRBicLkkpNFbQr7H_tk"
 CHROMA_GOOGLE_IDS["abo"]="11V6YfofjtZglnKp9Ymk65w23BphDUTIW"
+CHROMA_GOOGLE_IDS["coco"]="15HiMNax84lGQ0q7i1S0kJfWb2bcOpPif"
 
 # ABO metadata Pandas dataframe file name and Google Drive ID
 ABO_METADATA_DF=("abo-listings-final-draft.pkl", "1hChAT7PL_3c9YQugQJFFOAElbRPV7yqg")
