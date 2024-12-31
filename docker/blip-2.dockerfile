@@ -11,12 +11,12 @@ RUN apt install python3-pip -y
 
 COPY python_envs/py3.11_blip-2/requirements.txt /app/
 COPY assets/*.whl /app/
-COPY assets/blip-2-processors-pretrain.pkl /app/
-COPY assets/blip-2-processors-coco.pkl /app/
 
 RUN python3.11 -m pip install *.whl 
 RUN python3.11 -m pip install --no-cache-dir -r requirements.txt
 
+COPY assets/blip-2-processors-pretrain.pkl /app/
+COPY assets/blip-2-processors-coco.pkl /app/
 COPY code/Blip-2_API_endpoint/* /app/
 
 EXPOSE $BLIP_2_PORT
