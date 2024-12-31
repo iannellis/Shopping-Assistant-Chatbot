@@ -13,6 +13,14 @@ import base64
 Image_Item_Pair_IDs = namedtuple('Image_Item_Pair_IDs', ['image_id', 'item_id'])
 Image_Item_Pair_Data = namedtuple('Image_Item_Pair_Data', ['image_b64', 'item_str'])
 
+# CHROMA_HOST = "chroma"
+# OLLAMA_HOST = "ollama"
+# BLIP_2_HOST = "blip-2"
+
+CHROMA_HOST = "localhost"
+OLLAMA_HOST = "localhost"
+BLIP_2_HOST = "localhost"
+
 class Chroma_Collection_Connection():
     """Class to connect to the Chroma database and query it with embeddings, then filter
     the results down to CHROMA_MAX_ITEMS items."""
@@ -20,27 +28,29 @@ class Chroma_Collection_Connection():
         """Setup Chroma DB connection. Also makes sure database is loaded into RAM."""
         chroma_port = int(os.environ["CHROMA_PORT"])
         blip_2_model = os.environ["BLIP_2_MODEL"]
-        max_images_per_item = os.environ["CHROMA_MAX_IMAGES_PER_ITEM"]
-        max_items = os.environ["CHROMA_MAX_ITEMS"]
+        max_images_per_item = int(os.environ["CHROMA_MAX_IMAGES_PER_ITEM"])
+        max_items = int(os.environ["CHROMA_MAX_ITEMS"])
         n_return = max_items * max_images_per_item
         
         # wait for Chroma to come online
         client = None
         while not client:
             try:
-                client = chromadb.HttpClient(host='chroma', port=chroma_port)
+                client = chromadb.HttpClient(host=CHROMA_HOST, port=chroma_port)
             except ValueError:
                 print('Chroma DB does not appear to be running yet. Retrying.')
                 sleep(2)
         
         embedding_len = 768
         embedding_test = [1] * embedding_len
-        collection = client.get_collection(name='blip_2_'+blip_2_model)
+        collection_name = 'blip_2_'+blip_2_model
+        print('Using Chroma collection ' + collection_name)
+        collection = client.get_collection(name=collection_name)
         _ = collection.query(query_embeddings=[embedding_test], include=["metadatas", "distances"], n_results=n_return)
         
         self.collection = collection
         self.max_return_items = max_items
-        self.n_return = self.n_return
+        self.n_return = n_return
         
         self.blip_2_connection = Blip_2_Connection()
     
@@ -59,7 +69,7 @@ class Chroma_Collection_Connection():
         """Filter n_return image_ids and item_ids down to CHROMA_MAX_ITEMS items."""
         seen_items = set()
         image_item_pairs = []
-        metadatas = query_results['metadatas']
+        metadatas = query_results['metadatas'][0]
         
         i = 0
         while len(image_item_pairs) < self.max_return_items and i < len(metadatas):
@@ -82,7 +92,7 @@ class Blip_2_Connection():
     def __init__(self):
         # Wait for BLIP-2 connection
         blip_2_port = os.environ["BLIP_2_PORT"]
-        self.blip_2_url = "http://blip-2:" + blip_2_port + '/api/v1/'
+        self.blip_2_url = "http://" + BLIP_2_HOST + ":" + blip_2_port + '/api/v1/'
         
         response = None
         while not response:
@@ -110,7 +120,7 @@ def connect_ollama_llm():
     the model for use by LangGraph."""
     model_name = os.environ["OLLAMA_MODEL"]
     ollama_port = os.environ["OLLAMA_PORT"]
-    llm = ChatOllama(base_url = "ollama:"+ollama_port, model = model_name)
+    llm = ChatOllama(base_url = "http://" + OLLAMA_HOST + ":" + ollama_port, model = model_name)
     response = None
     # Check if Ollama is up and running and load the model into memory
     while not response:
@@ -158,14 +168,14 @@ class ABO_Dataset():
     
     def _get_item_as_str(self, item_id: str):
         """Get the row of data and convert it to a string consumable by an LLM."""
-        row = self.abo_meta[item_id]
+        row = self.abo_meta.loc[item_id]
         row_filtered = row.dropna()
         text = []
         for row_heading, row_item in zip(row_filtered.index, row_filtered):
             text.append('{')
             text.append(row_heading.replace('_', ' '))
             text.append(': ')
-            text.append(str(row_item))
+            text.append(str(row_item).replace('\n', ' ').replace('^', ' ').replace(',', ', '))
             text.append('}')
             text.append('; ')
         return ''.join(text)
