@@ -33,11 +33,8 @@ def run_embeddings(abo_dataset_dir='/mnt/d/abo-dataset', model_type='pretrain',
     dataloader_text = build_abo_dataloader_text(
         metadata_file, text_processor=txt_processors['eval'], batch_size=batch_size, num_workers=2)
     
-    multimodal_embeddings_df = embed_multimodal(model, dataloader_multimodal, device)
-    multimodal_embeddings_df.to_pickle(save_path + '/embeddings_' + model_type + '_multimodal.pkl')
-    text_embeddings_df = embed_text(model, dataloader_text)
-    text_embeddings_df.to_pickle(save_path + '/embeddings_' + model_type + '_text.pkl')
-    
+    embed_multimodal(model, dataloader_multimodal, device, save_path, model_type)
+    embed_text(model, dataloader_text, save_path, model_type)
     return
 
 def build_abo_dataloader_multimodal(images_dir: str, metadata_file: str, image_metadata_file: str, 
@@ -144,11 +141,11 @@ class ABODataset_text(ABODataset_multimodal):
         item_id = self.metadata.index[idx]
         return label, item_id
         
-def embed_multimodal(model, dataloader, device):
+def embed_multimodal(model, dataloader, device, save_path, model_type):
     embeddings_dict = {'image_id': [], 'item_id': [], 'embedding': []}
     
     model.eval()
-    for data in tqdm(dataloader):
+    for i, data in enumerate(tqdm(dataloader)):
         images, labels, image_ids, item_ids = data
         embeddings_dict['image_id'].extend(image_ids)
         embeddings_dict['item_id'].extend(item_ids)
@@ -158,11 +155,17 @@ def embed_multimodal(model, dataloader, device):
         
         output = model.extract_features(samples, mode='multimodal')
         embeddings_dict['embedding'].extend(output.multimodal_embeds.detach().cpu().numpy())
+        
+        if i % 999 == 0:
+            embeddings_df = pd.DataFrame(embeddings_dict)
+            embeddings_df.to_pickle(save_path + '/embeddings_' + model_type + '_multimodal_' + str(i+1) + '.pkl')
+            embeddings_dict = {'image_id': [], 'item_id': [], 'embedding': []}
 
     embeddings_df = pd.DataFrame(embeddings_dict)
-    return embeddings_df
+    embeddings_df.to_pickle(save_path + '/embeddings_' + model_type + '_multimodal_' + str(i+1) + '.pkl')
+    return
 
-def embed_text(model, dataloader):
+def embed_text(model, dataloader, save_path, model_type):
     embeddings_dict = {'item_id': [], 'embedding': []}
     
     model.eval()
@@ -176,4 +179,5 @@ def embed_text(model, dataloader):
         embeddings_dict['embedding'].extend(output.text_embeds.detach().cpu().numpy())
 
     embeddings_df = pd.DataFrame(embeddings_dict)
-    return embeddings_df
+    embeddings_df.to_pickle(save_path + '/embeddings_' + model_type + '_text.pkl')
+    return
