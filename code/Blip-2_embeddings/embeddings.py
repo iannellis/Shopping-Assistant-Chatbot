@@ -84,7 +84,7 @@ class ABODataset_multimodal(Dataset):
         self._reorg_metadata_columns()
         
     def _reorg_metadata_columns(self):
-        # drop item_keywords because they can be rediculously long
+        # drop item_keywords because there can be rediculously many
         self.metadata = self.metadata[['item_name', 'brand', 'model_name', 'model_year',
                                        'product_description', 'product_type', 'color',
                                        'fabric_type', 'style', 'material',
