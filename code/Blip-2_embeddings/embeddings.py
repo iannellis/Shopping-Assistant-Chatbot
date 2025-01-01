@@ -32,9 +32,9 @@ def run_embeddings(abo_dataset_dir='/mnt/d/abo-dataset', model_type='pretrain',
         metadata_file, text_processor=txt_processors['eval'], batch_size=batch_size, num_workers=2)
     
     multimodal_embeddings_df = embed_multimodal(model, dataloader_multimodal, device)
+    multimodal_embeddings_df.to_pickle(save_path + '/embeddings_' + model_type + '_multimodal.pkl')
     text_embeddings_df = embed_text(model, dataloader_text)
-    embeddings_df = pd.concat([multimodal_embeddings_df, text_embeddings_df], ignore_index=True)
-    embeddings_df.to_pickle(save_path + '/embeddings_' + model_type + '.pkl')
+    text_embeddings_df.to_pickle(save_path + '/embeddings_' + model_type + '_text.pkl')
     
     return
 
@@ -85,9 +85,10 @@ class ABODataset_multimodal(Dataset):
         self._reorg_metadata_columns()
         
     def _reorg_metadata_columns(self):
+        # drop item_keywords because they can be rediculously long
         self.metadata = self.metadata[['item_name', 'brand', 'model_name', 'model_year',
                                        'product_description', 'product_type', 'color',
-                                       'fabric_type', 'style', 'material', 'item_keywords',
+                                       'fabric_type', 'style', 'material'
                                        'pattern', 'finish_type', 'bullet_point']]
 
     def __len__(self):
@@ -130,12 +131,7 @@ class ABODataset_text(ABODataset_multimodal):
         self.metadata = metadata
         self.text_processor = text_processor
         
-        self._drop_rows_with_images()
         self._reorg_metadata_columns()
-        
-    def _drop_rows_with_images(self):
-        self.metadata = self.metadata[self.metadata['main_image_id'].isna() &
-                                      self.metadata['other_image_id'].isna()]
         
     def __len__(self):
         return len(self.metadata)
@@ -159,7 +155,7 @@ def embed_multimodal(model, dataloader, device):
         samples = {"image": images, "text_input": labels}
         
         output = model.extract_features(samples, mode='multimodal')
-        embeddings_dict['embedding'].extend(output.multimodal_embeds[:,0,:].detach().cpu().numpy())
+        embeddings_dict['embedding'].extend(output.multimodal_embeds.detach().cpu().numpy())
 
     embeddings_df = pd.DataFrame(embeddings_dict)
     return embeddings_df
@@ -175,7 +171,7 @@ def embed_text(model, dataloader):
         samples = {"text_input": labels}
         
         output = model.extract_features(samples, mode='text')
-        embeddings_dict['embedding'].extend(output.text_embeds[:,0,:].detach().cpu().numpy())
+        embeddings_dict['embedding'].extend(output.text_embeds.detach().cpu().numpy())
 
     embeddings_df = pd.DataFrame(embeddings_dict)
     return embeddings_df
