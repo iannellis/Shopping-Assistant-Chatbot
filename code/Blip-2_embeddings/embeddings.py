@@ -90,7 +90,7 @@ class ABODataset_multimodal(Dataset):
         # drop item_keywords because they can be rediculously long
         self.metadata = self.metadata[['item_name', 'brand', 'model_name', 'model_year',
                                        'product_description', 'product_type', 'color',
-                                       'fabric_type', 'style', 'material'
+                                       'fabric_type', 'style', 'material',
                                        'pattern', 'finish_type', 'bullet_point']]
 
     def __len__(self):
