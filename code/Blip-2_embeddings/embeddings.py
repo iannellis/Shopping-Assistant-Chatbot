@@ -22,6 +22,8 @@ def run_embeddings(abo_dataset_dir='/mnt/d/abo-dataset', model_type='pretrain',
         model, vis_processors, txt_processors = load_model_and_preprocess(
             name="blip2_feature_extractor", model_type=model_type, is_eval=True, device='cpu')
     else:
+        model, vis_processors, txt_processors = load_model_and_preprocess(
+            name="blip2_feature_extractor", model_type='pretrain', is_eval=True, device='cpu')
         model = torch.load(model_paths[model_type], weights_only=False)
     model.to(device)
 
