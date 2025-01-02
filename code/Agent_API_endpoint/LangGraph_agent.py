@@ -43,16 +43,17 @@ def retrieve_products(query: str | dict):
         if not query:
             # streaming dirty hack
             return '', []
-        match_ids = chroma_collection.query_image_text(image_b64=None, text=query)
+        match_item_ids = chroma_collection.query_text(text=query)
     elif isinstance(query, dict):
         ic(query["text"])
-        image_b64 = query['image_b64']
-        text = query['text']
-        match_ids = chroma_collection.query_image_text(image_b64=image_b64, text=text)   
-        # ic(match_ids)
-    if not match_ids:
-        return 'Nothing found.', [] 
-    image_item_pairs_data = abo_dataset.get_image_item_pairs_data(match_ids)
+        match_item_ids = chroma_collection.query_image_text(**query)   
+    else:
+        raise Exception('Invalid query type')
+    
+    # ic(match_ids)
+    if not match_item_ids:
+        return 'No matching products found.', [] 
+    image_item_pairs_data = abo_dataset.get_items_data(match_item_ids)
     
     # ic(image_item_pairs_data)
     images_b64 = []
@@ -75,13 +76,13 @@ def query_or_respond(state: MessagesState):
         image_b64 = last_message.additional_kwargs.pop("image_b64")
         
     # Provide system prompt, bind tool, and invoke model
-    # ic('In query_or_respond')
+    ic('In query_or_respond')
     if image_b64:
         primary_system_prompt = ChatPromptTemplate([("system", (
             'You are a helpful shopping assistant. The user is providing information '
             'about a product they are shopping for. Build a concise but informative '
             'summary of that product from the user-provided information. Use '
-            'conversation history for additional context to help build the summary '
+            'conversation history for additional context to help build the summary, '
             'if available. Call the "retrieve_products" tool with the summary. If '
             'the user has not provided any information about a product or no '
             'information at all, call the "retrieve_products" tool with an empty '
@@ -99,18 +100,18 @@ def query_or_respond(state: MessagesState):
             'additional context to help build the summary, if available. If the user '
             'has only provided a broad category of products (such as shoes, but not '
             'carrots), immediately and concisely prompt the user for additional '
-            'information without calling the "retrieve_products" tool.'
-            '\n'
+            'information without calling the "retrieve_products" tool. '
             'If the user provides a prompt that does not meet any of the parameters '
             'set out above, call the "retrieve_products" tool with an empty string: '
             '"".'
             )),
             ("user", "{input}")])
         
-    # ic(primary_system_prompt)
+    ic(primary_system_prompt)
+    ic(state['messages'])
     llm_with_tools = primary_system_prompt | llm.bind_tools([retrieve_products])
     response = llm_with_tools.invoke(state["messages"])
-    # ic(response)
+    ic(response)
     # hack in image handling
     if image_b64 and response.tool_calls:
         original_query = response.tool_calls[0]['args']['query']
@@ -139,6 +140,7 @@ def generate(state: MessagesState):
 
     # ic(tool_messages)
     # Format into prompt
+    ic(conversation_messages)
     docs_content = "\n\n".join(doc.content for doc in tool_messages)
     ic(docs_content)
     if docs_content:
@@ -146,22 +148,22 @@ def generate(state: MessagesState):
             'You are being provided an enumerated list of products. Briefly tell the '
             'user that you found the closest matches to what they\'re looking for in '
             'your database. Then, using only the information provided below, enumerate '
-            'each product, provide its name, then a one or two-sentence summary. For '
+            'each product, provide its name, then a 1 or 2-sentence summary. For '
             'example:\n'
             '   1. **The best ketchup in the world**\n'
             '      Rated #1 by the World Ketchup Forum, this ketchup will jazz up your '
-            '      food so that your guests never complain again.\n'
+            '      food so that your guests never complain about its blandness again.\n'
             '\n'
             '   2. **World’s biggest pumpkin**\n'
             '      Making it into the Gueniss Book of World Records, this pumpkin weighs '
             '      in at one ton. With its stunning orange color, it\'s a must for '
-            '      anybody aiming to throw the biggest Halloween party  in town.\n'
+            '      anybody aiming to throw the biggest Halloween party in town.\n'
             '\n'
             'Summarize any information provided about each product, even if it does not '
             'match the user prompt. '
             'Always list all the items and provide a summary of each. '
-            'List the items in the order they were provided to you. '
-            'Do not elaborate beyond using information provided below. Here is the '
+            'Only use the information below to develop the summaries. '
+            'List the items in the order they were provided to you. Here is the '
             'product information:\n'
             f'{docs_content}'
         )
@@ -202,6 +204,7 @@ async def prompt(chat_id: str, prompt: str="", image_b64: str=None):
     config = {"configurable": {"thread_id": chat_id}}
 
     input_message = {"role": "user", "content": prompt}
+    ic(input_message)
     if image_b64:
         input_message["image_b64"] = image_b64
         user_images[chat_id] = image_b64
