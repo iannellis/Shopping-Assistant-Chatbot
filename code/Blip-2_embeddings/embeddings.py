@@ -178,7 +178,7 @@ def embed_text(model, dataloader, save_path, model_type):
         output = model.extract_features(samples, mode='text')
         embeddings_dict['embedding'].extend(output.text_embeds.detach().cpu().numpy())
 
-        if (i+1) % 1000 == 0:
+        if (i+1) % 500 == 0:
             embeddings_df = pd.DataFrame(embeddings_dict)
             embeddings_df.to_pickle(save_path + '/embeddings_' + model_type + '_text_' + str(i+1) + '.pkl')
             embeddings_dict = {'item_id': [], 'embedding': []}
