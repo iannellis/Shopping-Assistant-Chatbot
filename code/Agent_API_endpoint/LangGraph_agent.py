@@ -5,9 +5,10 @@ from langgraph.graph import END, StateGraph, MessagesState
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.memory import MemorySaver
 
-from util import Chroma_Collection_Connection, connect_ollama_llm, ABO_Dataset
-
+from collections import defaultdict
 from icecream import ic
+
+from util import Chroma_Collection_Connection, connect_ollama_llm, ABO_Dataset
 
 """The LangGraph agent, which takes a user's query, retrieves relevant product
 information, and uses that information to respond to a user's queries.
@@ -28,29 +29,27 @@ generate what could be a long response."""
 chroma_collection = Chroma_Collection_Connection()
 llm = connect_ollama_llm()
 abo_dataset = ABO_Dataset()
-
-# store the images users upload for future recall in the UI
-user_images = dict()
     
 @tool(response_format="content_and_artifact")
 def retrieve_products(query: str | dict):
     """Call with a query about a product a user might shop for to get possible
-    matches and details about those matches. In any other circumstance, call with an 
-    empty string: ''."""
-    ic("In retrieve_products")
+    matches and details about those matches. The query may be up to a sentence long. 
+    In any other circumstance, call with an empty string: ''."""
+    # ic("In retrieve_products")
     if isinstance(query, str):
-        ic(query)
+        # ic(query)
         if not query:
             # streaming dirty hack
             return '', []
         match_item_ids = chroma_collection.query_text(text=query)
     elif isinstance(query, dict):
-        ic(query["text"])
+        # ic(query["text"])
         match_item_ids = chroma_collection.query_image_text(**query)   
+        # ic(match_item_ids)
     else:
         raise Exception('Invalid query type')
     
-    # ic(match_ids)
+    
     if not match_item_ids:
         return 'No matching products found.', [] 
     image_item_pairs_data = abo_dataset.get_items_data(match_item_ids)
@@ -60,7 +59,7 @@ def retrieve_products(query: str | dict):
     product_data = []
     for i, pair in enumerate(image_item_pairs_data):
         images_b64.append(pair.image_b64)
-        product_data.append('Item ' + str(i+1) + ': ' + pair.item_str)
+        product_data.append(str(i+1) + ': (' + pair.item_str + ')')
     return '\n\n'.join(product_data), images_b64
             
 # Step 1: Generate an AIMessage that may include a tool-call to be sent.
@@ -76,9 +75,9 @@ def query_or_respond(state: MessagesState):
         image_b64 = last_message.additional_kwargs.pop("image_b64")
         
     # Provide system prompt, bind tool, and invoke model
-    ic('In query_or_respond')
+    # ic('In query_or_respond')
     if image_b64:
-        primary_system_prompt = ChatPromptTemplate([("system", (
+        primary_system_prompt = (
             'You are a helpful shopping assistant. The user is providing information '
             'about a product they are shopping for. Build a concise but informative '
             'summary of that product from the user-provided information. Use '
@@ -87,10 +86,9 @@ def query_or_respond(state: MessagesState):
             'the user has not provided any information about a product or no '
             'information at all, call the "retrieve_products" tool with an empty '
             'string: "".'
-            )),
-            ("user", "{input}")])
+            )
     else:
-        primary_system_prompt = ChatPromptTemplate([("system", (
+        primary_system_prompt = (
             'You are a helpful shopping assistant. If the user prompt mentions '
             'a product a user might shop for without any other context, the user '
             'mentions they\'re shopping for a product, or in any way implies that '
@@ -104,14 +102,20 @@ def query_or_respond(state: MessagesState):
             'If the user provides a prompt that does not meet any of the parameters '
             'set out above, call the "retrieve_products" tool with an empty string: '
             '"".'
-            )),
-            ("user", "{input}")])
-        
-    ic(primary_system_prompt)
-    ic(state['messages'])
-    llm_with_tools = primary_system_prompt | llm.bind_tools([retrieve_products])
-    response = llm_with_tools.invoke(state["messages"])
-    ic(response)
+            )
+   
+    conversation_messages = [
+        message
+        for message in state["messages"]
+        if message.type in ("human", "system")
+        or (message.type == "ai" and not message.tool_calls)
+    ]
+
+    prompt = [SystemMessage(primary_system_prompt)] + conversation_messages
+    # ic(prompt)
+    llm_with_tools = llm.bind_tools([retrieve_products])
+    response = llm_with_tools.invoke(prompt)
+    # ic(response)
     # hack in image handling
     if image_b64 and response.tool_calls:
         original_query = response.tool_calls[0]['args']['query']
@@ -140,9 +144,9 @@ def generate(state: MessagesState):
 
     # ic(tool_messages)
     # Format into prompt
-    ic(conversation_messages)
+    # ic(conversation_messages)
     docs_content = "\n\n".join(doc.content for doc in tool_messages)
-    ic(docs_content)
+    # ic(docs_content)
     if docs_content:
         system_message_content = (
             'You are being provided an enumerated list of products. Briefly tell the '
@@ -159,10 +163,14 @@ def generate(state: MessagesState):
             '      in at one ton. With its stunning orange color, it\'s a must for '
             '      anybody aiming to throw the biggest Halloween party in town.\n'
             '\n'
+            '   3. **Military-grade water bottle**\n'
+            '      If your water bottle is always getting broken due to your strenuous '
+            '      activities, this is the water bottle for you. Tested to withstand up '
+            '      to one ton of weight.\n'
             'Summarize any information provided about each product, even if it does not '
             'match the user prompt. '
             'Always list all the items and provide a summary of each. '
-            'Only use the information below to develop the summaries. '
+            'Only use the information below in this system prompt to develop the summaries. '
             'List the items in the order they were provided to you. Here is the '
             'product information:\n'
             f'{docs_content}'
@@ -204,10 +212,8 @@ async def prompt(chat_id: str, prompt: str="", image_b64: str=None):
     config = {"configurable": {"thread_id": chat_id}}
 
     input_message = {"role": "user", "content": prompt}
-    ic(input_message)
     if image_b64:
         input_message["image_b64"] = image_b64
-        user_images[chat_id] = image_b64
 
     for message, metadata in graph.stream({"messages": [input_message]}, stream_mode="messages", config=config):
         if metadata['langgraph_node']=='tools' and message.artifact:
@@ -215,13 +221,43 @@ async def prompt(chat_id: str, prompt: str="", image_b64: str=None):
         if metadata['langgraph_node']=='generate':
             yield {"images": [], "text": message.content}
             
-def get_checkpoint_ids():
+def get_thread_ids():
     """Get a list of all memory checkpoints."""
-    checkpoints = memory.list()
-    return checkpoints
+    return list(memory.storage.keys())
 
-def retrieve_checkpoint(chat_id: str):
+def get_message_thread(thread_id: str):
     """Retrieve a chat thread."""
-    config = {"configurable": {"thread_id": chat_id}}
-    checkpoint = memory.list(config)
-    return checkpoint, user_images[chat_id]
+    config = {"configurable": {"thread_id": thread_id}}
+    checkpoints = list(reversed(list(memory.list(config))))
+    conversation = []
+    user_image = None
+    i = 0
+    while i < len(checkpoints):
+        data = checkpoints[i][2]['writes']
+        if not data:
+            i += 1
+            continue
+        
+        if '__start__' in data:
+            content = data['__start__']['messages'][0]['content']
+            conversation.append({'role': 'user', 'images': [], 'content': content})
+            if 'image_b64' in data['__start__']['messages'][0]:
+                user_image = data['__start__']['messages'][0]['image_b64']
+            i += 1
+        # I tried to instruct the LLM to avoid outputting from here, but it might happen
+        elif 'query_or_respond' in data:
+            if data['query_or_respond']['messages'][0].content:
+                content = data['query_or_respond']['messages'][0].content
+                conversation.append({'role': 'ai', 'images': [], 'content': content})
+            i += 1
+        # 'generate' output always follows a tool call and the reverse is true, so do them together
+        elif 'tools' in data:
+            images = data['tools']['messages'][0].artifact
+            data = checkpoints[i+1][2]['writes']
+            content = data['generate']['messages'][0].content
+            conversation.append({'role': 'ai', 'images': images, 'content': content})
+            i += 2
+        else:
+            print('Problem in get_message_thread')
+    
+    return conversation, user_image

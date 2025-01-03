@@ -41,9 +41,9 @@ class Chroma_Collection_Connection():
                 print('Chroma DB does not appear to be running yet. Retrying.')
                 sleep(2)
         
-        embedding_len = 768
+        embedding_len = 768 * 4
         embedding_test = [1] * embedding_len
-        multimodal_collection_name = 'blip_2_'+blip_2_model
+        multimodal_collection_name = 'blip_2_'+blip_2_model+'_multimodal'
         print('Using Chroma collection ' + multimodal_collection_name)
         collection_multimodal = client.get_collection(name=multimodal_collection_name)
         _ = collection_multimodal.query(query_embeddings=[embedding_test], include=["metadatas"], n_results=n_return)
@@ -66,10 +66,8 @@ class Chroma_Collection_Connection():
     
     def query_text(self, text=None) -> list[str]:
         """Get the text-only documents of the top CHROMA_MAX_ITEMS matching the query."""
-        query_return = self.collection_text.get(query_texts=[text], include=[], n_results=self.max_return_items)
-        docs = ['documents'][0]
-        
-        return 
+        query_return = self.collection_text.query(query_texts=[text], include=[], n_results=self.max_return_items)
+        return query_return['ids'][0]
     
     def _query_multimodal_embeddings(self, embeddings: np.array) -> dict:
         """Get the top n_return image_ids and item_ids matching a query's embeddings."""
