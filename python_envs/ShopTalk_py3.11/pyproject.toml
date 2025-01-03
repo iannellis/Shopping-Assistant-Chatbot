@@ -30,6 +30,7 @@ pympler = "^1.1"
 deepeval = "^2.0.5"
 fastapi = "^0.115.6"
 uvicorn = "^0.32.1"
+icecream = "^2.1.3"
 
 [[tool.poetry.source]]
 name = "pytorch-gpu-src"
