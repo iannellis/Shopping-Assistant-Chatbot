@@ -66,8 +66,8 @@ async def embed_image(input: ImageInput) -> dict:
     
     # Generate embedding
     sample = {'image': image_tensor}
-    embedding = model.extract_features(sample, mode='image').image_embeds[0,0,:].detach().cpu().tolist()
-    return {"embedding": embedding}
+    embedding = model.extract_features(sample, mode='image').image_embeds[0,:4,:].detach().cpu().numpy()
+    return {"embedding": embedding.reshape(-1).tolist()}
 
 @api_router.post("/embed_text", status_code=201)
 async def embed_text(input: TextInput):
@@ -78,8 +78,8 @@ async def embed_text(input: TextInput):
     
     # Generate embedding
     sample = {'text_input': [text]}
-    embedding = model.extract_features(sample, mode='text').text_embeds[0,0,:].detach().cpu().tolist()
-    return {"embedding": embedding}
+    embedding = model.extract_features(sample, mode='text').text_embeds[0,:2,:].detach().cpu().numpy()
+    return {"embedding": embedding.reshape(-1).tolist()}
 
 @api_router.post("/embed_multimodal", status_code=201)
 async def embed_multimodal(input: MultimodalInput):
@@ -92,8 +92,8 @@ async def embed_multimodal(input: MultimodalInput):
     
     # Generate embedding
     sample = {'image': image_tensor, 'text_input': [text]}
-    embedding = model.extract_features(sample, mode='multimodal').multimodal_embeds[0,0,:].detach().cpu().tolist()
-    return {"embedding": embedding}
+    embedding = model.extract_features(sample, mode='multimodal').multimodal_embeds[0,:4,:].detach().cpu().numpy()
+    return {"embedding": embedding.reshape(-1).tolist()}
 
 app.include_router(api_router, prefix="/api/v1")
 print('BLIP-2 endpoint up and running.')
