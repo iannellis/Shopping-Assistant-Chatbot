@@ -41,8 +41,8 @@ async def prompt_fastapi(input: PromptInput) -> StreamingResponse:
     """
     Get agent response from input
     """
-    async def streaming_generator():
-        async for message in prompt(thread_id=input.thread_id, prompt_str=input.text, image_b64=input.image):
+    def streaming_generator():
+        for message in prompt(thread_id=input.thread_id, prompt_str=input.text, image_b64=input.image):
             yield json.dumps(message) + "\n"
             
     return StreamingResponse(streaming_generator(), media_type="application/json")
