@@ -114,8 +114,8 @@ def query_or_respond(state: MessagesState):
     llm_with_tools = llm.bind_tools([retrieve_products])
     response = llm_with_tools.invoke(prompt)
     # ic(response)
-    # hack in image handling
-    if image_b64 and response.tool_calls:
+    # hack in a response so the user isn't left waiting
+    if response.tool_calls and response.tool_calls[0]['args']['query'] and image_b64:
         original_query = response.tool_calls[0]['args']['query']
         response.tool_calls[0]['args']['query'] = {'text': original_query, 'image_b64': image_b64}
     
@@ -214,6 +214,8 @@ def prompt(thread_id: str, prompt_str: str="", image_b64: str=""):
         input_message["image_b64"] = image_b64
 
     for message, metadata in graph.stream({"messages": [input_message]}, stream_mode="messages", config=config):
+        if metadata['langgraph_node']=='query_or_respond' and message.tool_calls and message.tool_calls[0]['args']['query']:
+            yield {"images": [], "text": "Searching for relevant products...\n\n"}
         if metadata['langgraph_node']=='tools' and message.artifact:
             yield {"images": message.artifact, "text": ""}
         if metadata['langgraph_node']=='generate':
