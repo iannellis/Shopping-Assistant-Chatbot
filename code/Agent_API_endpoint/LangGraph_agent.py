@@ -205,7 +205,7 @@ memory = MemorySaver()
 graph = graph_builder.compile(checkpointer=memory)
     
 # For outside funtion to calls
-async def prompt(thread_id: str, prompt_str: str="", image_b64: str=""):
+def prompt(thread_id: str, prompt_str: str="", image_b64: str=""):
     """Run a user's prompt through the model"""
     config = {"configurable": {"thread_id": thread_id}}
 
