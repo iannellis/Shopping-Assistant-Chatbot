@@ -10,6 +10,19 @@ from icecream import ic
 # agent_url = "http://agent:" + os.environ["AGENT_PORT"] + "/api/v1/"
 agent_url = "http://localhost:9001/api/v1"
 
+# ----------------------------Functons used later---------------------------------------
+def new_chat_name():
+    """Clear session state when user enters a new chat name"""
+    thread_id = st.session_state.chat_name_input.strip().replace(" ", "_")
+    if  thread_id in st.session_state.all_thread_ids:
+        st.sidebar.warning("Chat name already in use.")
+    else:
+        st.session_state.thread_name = thread_id
+        st.session_state.messages = []
+        st.session_state.user_image = None
+        st.session_state.user_image_sent = False
+    st.session_state.chat_name_input = ""
+
 def stream_response(response):
     """Process the streamed JSON objects from the agent"""
     for chunk in response.iter_lines(decode_unicode=True):
@@ -43,6 +56,8 @@ def integrate_images(messages):
             message["content"] = new_message_content
     return messages
 
+# ----------------------------------The UI--=======-------------------------------------
+
 st.title('ShopTalk Chatbot 🤖')
 
 # Initialize chat history and related states
@@ -65,18 +80,6 @@ st.sidebar.title("Your Chats")
 if "all_thread_ids" not in st.session_state:
     response = requests.get(agent_url + '/thread_id')
     st.session_state["all_thread_ids"] = response.json()['thread_ids']
-
-def new_chat_name():
-    """Clear session state when user enters a new chat name"""
-    thread_id = st.session_state.chat_name_input.strip().replace(" ", "_")
-    if  thread_id in st.session_state.all_thread_ids:
-        st.sidebar.warning("Chat name already in use.")
-    else:
-        st.session_state.thread_name = thread_id
-        st.session_state.messages = []
-        st.session_state.user_image = None
-        st.session_state.user_image_sent = False
-    st.session_state.chat_name_input = ""
 
 # If a user inputs a new chat name, reset the chat session (calls new_chat_name)
 st.sidebar.text_input("Enter chat name to start a new chat:", key="chat_name_input", on_change=new_chat_name)
