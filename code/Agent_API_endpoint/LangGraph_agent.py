@@ -1,11 +1,9 @@
 from langchain_core.messages import SystemMessage
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import tool
 from langgraph.graph import END, StateGraph, MessagesState
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.memory import MemorySaver
 
-from collections import defaultdict
 from icecream import ic
 
 from util import Chroma_Collection_Connection, connect_ollama_llm, ABO_Dataset
@@ -206,12 +204,12 @@ graph_builder.add_edge("generate", END)
 memory = MemorySaver()
 graph = graph_builder.compile(checkpointer=memory)
     
-# For outside funtion to call
-async def prompt(chat_id: str, prompt: str="", image_b64: str=None):
+# For outside funtion to calls
+async def prompt(thread_id: str, prompt_str: str="", image_b64: str=""):
     """Run a user's prompt through the model"""
-    config = {"configurable": {"thread_id": chat_id}}
+    config = {"configurable": {"thread_id": thread_id}}
 
-    input_message = {"role": "user", "content": prompt}
+    input_message = {"role": "user", "content": prompt_str}
     if image_b64:
         input_message["image_b64"] = image_b64
 
