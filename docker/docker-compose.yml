@@ -1,5 +1,6 @@
 services:
   ui:
+    env_file: ".env"
     build:
       context: ..
       dockerfile: docker/ui.dockerfile
@@ -54,8 +55,7 @@ services:
   ollama:
     image: ollama/ollama
     volumes:
-      - ${OLLAMA_LOCAL}:/root/.ollama
-    command: /bin/ollama pull ${OLLAMA_MODEL} && /bin/ollama serve
+      - ${OLLAMA_DIR_LOCAL}:/root/.ollama
     deploy:
       resources:
         reservations:
