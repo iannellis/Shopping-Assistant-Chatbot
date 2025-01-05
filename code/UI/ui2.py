@@ -4,11 +4,12 @@ from PIL import Image
 import io
 import json
 import base64
+import os
 
-from icecream import ic
+# from icecream import ic
 
-# agent_url = "http://agent:" + os.environ["AGENT_PORT"] + "/api/v1/"
-agent_url = "http://localhost:9001/api/v1"
+agent_url = "http://agent:" + os.environ["AGENT_PORT"] + "/api/v1"
+# agent_url = "http://localhost:9001/api/v1"
 
 # ----------------------------Functons used later---------------------------------------
 def new_chat_name():

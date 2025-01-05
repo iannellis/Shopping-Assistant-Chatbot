@@ -1,14 +1,14 @@
 # Use the 3.12 environment
-import os
+# import os
 
-os.environ["BLIP_2_MODEL"]="gs"
-os.environ["BLIP_2_PORT"]="9002"
-os.environ["CHROMA_PORT"]="8000"
-os.environ["CHROMA_MAX_IMAGES_PER_ITEM"]="21"
-os.environ["CHROMA_MAX_ITEMS"]="3"
-os.environ["OLLAMA_PORT"]="11434"
-os.environ["OLLAMA_MODEL"]="llama3.1:8b"
-os.environ["ABO_DIR_CONTAINER"]="/mnt/d/abo-dataset"
+# os.environ["BLIP_2_MODEL"]="gs"
+# os.environ["BLIP_2_PORT"]="9002"
+# os.environ["CHROMA_PORT"]="8000"
+# os.environ["CHROMA_MAX_IMAGES_PER_ITEM"]="21"
+# os.environ["CHROMA_MAX_ITEMS"]="3"
+# os.environ["OLLAMA_PORT"]="11434"
+# os.environ["OLLAMA_MODEL"]="llama3.1:8b"
+# os.environ["ABO_DIR_CONTAINER"]="/mnt/d/abo-dataset"
 
 
 from fastapi import FastAPI, APIRouter
@@ -19,7 +19,7 @@ from LangGraph_agent import prompt, get_thread_ids, get_message_thread
 
 import json
 
-from icecream import ic
+# from icecream import ic
 
 app = FastAPI(title='ShopTalk Agent', openapi_url="/openapi.json")
 api_router = APIRouter()

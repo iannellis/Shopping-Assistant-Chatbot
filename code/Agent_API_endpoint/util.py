@@ -10,15 +10,19 @@ from time import sleep
 from collections import namedtuple
 import base64
 
+from ollama import Client
+
 Item_Data = namedtuple('Image_Item_Pair_Data', ['image_b64', 'item_str'])
 
-# CHROMA_HOST = "chroma"
-# OLLAMA_HOST = "ollama"
-# BLIP_2_HOST = "blip-2"
+CHROMA_HOST = "chroma"
+OLLAMA_HOST = "ollama"
+BLIP_2_HOST = "blip-2"
 
-CHROMA_HOST = "localhost"
-OLLAMA_HOST = "localhost"
-BLIP_2_HOST = "localhost"
+# CHROMA_HOST = "localhost"
+# OLLAMA_HOST = "localhost"
+# BLIP_2_HOST = "localhost"
+
+
 
 class Chroma_Collection_Connection():
     """Class to connect to the Chroma database and query it with embeddings, then filter
@@ -121,7 +125,13 @@ def connect_ollama_llm():
     the model for use by LangGraph."""
     model_name = os.environ["OLLAMA_MODEL"]
     ollama_port = os.environ["OLLAMA_PORT"]
-    llm = ChatOllama(base_url = "http://" + OLLAMA_HOST + ":" + ollama_port, model = model_name)
+    ollama_url = "http://" + OLLAMA_HOST + ":" + ollama_port
+    
+    # make sure model is pulled
+    ollama_client = Client(host=ollama_url)
+    ollama_client.pull(model_name)
+    
+    llm = ChatOllama(base_url=ollama_url, model=model_name)
     response = None
     # Check if Ollama is up and running and load the model into memory
     while not response:
