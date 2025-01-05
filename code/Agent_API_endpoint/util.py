@@ -22,8 +22,6 @@ BLIP_2_HOST = "blip-2"
 # OLLAMA_HOST = "localhost"
 # BLIP_2_HOST = "localhost"
 
-
-
 class Chroma_Collection_Connection():
     """Class to connect to the Chroma database and query it with embeddings, then filter
     the results down to CHROMA_MAX_ITEMS items. Includes both the BLIP-2 and text-only
@@ -103,7 +101,7 @@ class Blip_2_Connection():
         while not response:
             try:
                 response = requests.get(self.blip_2_url, timeout=5)
-            except requests.ReadTimeout:
+            except requests.exceptions.ConnectionError:
                 print('Blip-2 endpoint does not appear to be running yet. Retrying')
 
     def embed(self, image_b64: None, text: None) -> list | None:
