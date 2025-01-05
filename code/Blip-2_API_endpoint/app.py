@@ -25,7 +25,6 @@ else:
         vis_processor, text_processor = pickle.load(f)
 
 # the model itself
-
 print('Loading BLIP-2 model ' + model_selection)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 models_dir = os.environ["BLIP_2_DIR_CONTAINER"]
