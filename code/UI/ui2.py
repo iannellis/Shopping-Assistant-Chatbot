@@ -5,11 +5,23 @@ import io
 import json
 import base64
 import os
+from time import sleep
 
 # from icecream import ic
 
 agent_url = "http://agent:" + os.environ["AGENT_PORT"] + "/api/v1"
 # agent_url = "http://localhost:9001/api/v1"
+
+# make sure agent is up and running before fully loading UI
+response = None
+while not response:
+    try:
+        response = requests.get(agent_url, timeout=5)
+    except requests.exceptions.ConnectionError:
+        print('Agent endpoint does not appear to be running yet. Retrying')
+        sleep(2)
+        
+print('UI up and running')
 
 # ----------------------------Functons used later---------------------------------------
 def new_chat_name():
