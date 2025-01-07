@@ -75,6 +75,8 @@ def stream_response(response):
 
 # ----------------------------------The UI--=======-------------------------------------
 
+st.set_page_config(page_title="ShopTalk Chatbot")
+
 st.title('ShopTalk Chatbot 🤖')
 
 # Initialize chat history and related states
