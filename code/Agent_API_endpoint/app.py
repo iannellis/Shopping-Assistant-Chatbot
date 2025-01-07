@@ -15,7 +15,8 @@ from fastapi import FastAPI, APIRouter
 from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
 
-from LangGraph_agent import prompt, get_thread_ids, get_message_thread
+from LangGraph_agent import (prompt, get_thread_ids, get_message_thread, 
+                             save_feedback, load_feedback)
 
 import json
 
@@ -36,7 +37,7 @@ async def root() -> dict:
     """
     return {"msg": "You can use this endpoint to interact with the chat-bot agent."}
 
-@api_router.post("/prompt", status_code=201)
+@api_router.post("/prompt", status_code=200)
 async def prompt_fastapi(input: PromptInput) -> StreamingResponse:
     """
     Get agent response from input
@@ -47,20 +48,34 @@ async def prompt_fastapi(input: PromptInput) -> StreamingResponse:
             
     return StreamingResponse(streaming_generator(), media_type="application/json")
 
-@api_router.get("/thread_id", status_code=200)
+@api_router.get("/chat_threads", status_code=200)
 async def get_thread_ids_fastapi():
     """
     Get IDs of all chat threads
     """
     return {"thread_ids": get_thread_ids()}
 
-@api_router.get("/thread_id/{thread_id}", status_code=200)
+@api_router.get("/chat_threads/{thread_id}", status_code=200)
 async def get_chat_history(thread_id: str):
     """
     Get a chat thread by ID
     """
     conversation, user_image = get_message_thread(thread_id)
     return {"messages": conversation, "user_image": user_image}
+
+@api_router.put("/feedback/{thread_id}", status_code=201)
+async def put_feedback(thread_id: str, feedback: dict):
+    """
+    Save the user's feedback with the agent
+    """
+    save_feedback(thread_id, feedback)
+    
+@api_router.get("/feedback/{thread_id}", status_code=200)
+async def get_feedback(thread_id: str):
+    """
+    Load the user's feedback from the agent and send to client
+    """
+    return load_feedback(thread_id)
 
 app.include_router(api_router, prefix="/api/v1")
 print('Agent endpoint up and running.')

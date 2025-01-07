@@ -5,6 +5,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.memory import MemorySaver
 
 # from icecream import ic
+from collections import defaultdict
 
 from util import Chroma_Collection_Connection, connect_ollama_llm, ABO_Dataset
 
@@ -121,6 +122,9 @@ def query_or_respond(state: MessagesState):
     
     return {"messages": [response]}
 
+# Step 2: Execute the retrieval.
+tools = ToolNode([retrieve_products])
+
 # Step 3: Generate a response using the retrieved content.
 def generate(state: MessagesState):
     """Generate answer."""
@@ -182,9 +186,6 @@ def generate(state: MessagesState):
     response = llm.invoke(prompt)
     # ic(response)
     return {"messages": [response]}
-
-# Step 2: Execute the retrieval.
-tools = ToolNode([retrieve_products])
 
 # Compile application and test
 graph_builder = StateGraph(MessagesState)
@@ -261,3 +262,13 @@ def get_message_thread(thread_id: str):
             print('Problem in get_message_thread')
     
     return conversation, user_image
+
+user_feedback = defaultdict(dict)
+
+def save_feedback(thread_id: str, feedback: dict):
+    """Whenever a user provides feedback, we save it."""
+    user_feedback[thread_id] = feedback
+    
+def load_feedback(thread_id: str):
+    """Whenever we load an existing thread, we load the existing feedback."""
+    return user_feedback[thread_id]

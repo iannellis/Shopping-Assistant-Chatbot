@@ -12,16 +12,13 @@ from time import sleep
 agent_url = "http://agent:" + os.environ["AGENT_PORT"] + "/api/v1"
 # agent_url = "http://localhost:9001/api/v1"
 
-# make sure agent is up and running before fully loading UI
+# make sure agent is up and running before fully loading UI, otherwise shows errors
 response = None
 while not response:
     try:
-        response = requests.get(agent_url, timeout=5)
+        response = requests.get(agent_url+'/', timeout=5)
     except requests.exceptions.ConnectionError:
-        print('Agent endpoint does not appear to be running yet. Retrying')
         sleep(2)
-        
-print('UI up and running')
 
 # ----------------------------Functons used later---------------------------------------
 def new_chat_name():
@@ -32,9 +29,31 @@ def new_chat_name():
     else:
         st.session_state.thread_name = thread_id
         st.session_state.messages = []
+        st.session_state.feedback = {}
         st.session_state.user_image = None
         st.session_state.user_image_sent = False
     st.session_state.chat_name_input = ""
+    
+def save_feedback(response_idx: str):
+    """Store the user's feedback locally and with the agent"""
+    st.session_state.feedback[response_idx] = st.session_state[f"feedback-{response_idx}"]
+    thread_id = st.session_state.thread_name
+    requests.put(agent_url + '/feedback/' + thread_id, json=st.session_state.feedback)
+    
+def integrate_images(messages):
+    """When loading an existing thread, integrate the images sent from the agent
+    into a form usable by Streamlit."""
+    for message in messages:
+        if message["images"]:
+            new_message_content = []
+            images = message.pop("images")
+            for idx, base64_image in enumerate(images):
+                new_message_content.append("### Product " + str(idx+1) + ":")
+                image = Image.open(io.BytesIO(base64.b64decode(base64_image)))
+                new_message_content.append(image)
+            new_message_content.append(message["content"])
+            message["content"] = new_message_content
+    return messages
 
 def stream_response(response):
     """Process the streamed JSON objects from the agent"""
@@ -54,21 +73,6 @@ def stream_response(response):
             except json.JSONDecodeError as e:
                 print(f"Failed to decode JSON: {e}")
 
-def integrate_images(messages):
-    """When loading an existing thread, integrate the images sent from the agent
-    into a form usable by Streamlit."""
-    for message in messages:
-        if message["images"]:
-            new_message_content = []
-            images = message.pop("images")
-            for idx, base64_image in enumerate(images):
-                new_message_content.append("### Product " + str(idx+1) + ":")
-                image = Image.open(io.BytesIO(base64.b64decode(base64_image)))
-                new_message_content.append(image)
-            new_message_content.append(message["content"])
-            message["content"] = new_message_content
-    return messages
-
 # ----------------------------------The UI--=======-------------------------------------
 
 st.title('ShopTalk Chatbot 🤖')
@@ -85,13 +89,17 @@ if "user_image_sent" not in st.session_state:
     
 if "thread_name" not in st.session_state:
     st.session_state["thread_name"] = "First_Chat"
+    
+if "feedback" not in st.session_state:
+    # tracks the feedback for the ith response from the agent
+    st.session_state["feedback"] = {}
 
 # Sidebar for chat name input and listing previous chats
 st.sidebar.title("Your Chats")
 
 # retrieve previous chat threads
 if "all_thread_ids" not in st.session_state:
-    response = requests.get(agent_url + '/thread_id')
+    response = requests.get(agent_url + '/chat_threads')
     st.session_state["all_thread_ids"] = response.json()['thread_ids']
 
 # If a user inputs a new chat name, reset the chat session (calls new_chat_name)
@@ -102,9 +110,10 @@ for thread_id in reversed(st.session_state.all_thread_ids):
     # button push or page refresh (changes to First Chat in latter case)
     if st.sidebar.button(thread_id.replace("_", " ")) or thread_id==st.session_state.thread_name \
             and not st.session_state.messages:
-        chat_history = requests.get(agent_url + '/thread_id/' + thread_id).json()
         st.session_state.thread_name = thread_id
+        chat_history = requests.get(agent_url + '/chat_threads/' + thread_id).json()
         st.session_state.messages = integrate_images(chat_history["messages"])
+        st.session_state.feedback = requests.get(agent_url + '/feedback/' + thread_id).json()
         st.session_state.user_image = chat_history["user_image"]
         if st.session_state.user_image:
             st.session_state.user_image_sent = True
@@ -127,12 +136,19 @@ if st.session_state.user_image:
     st.write(image)
     
 # Display chat messages from history on app rerun
-for message in st.session_state.messages:
+for i, message in enumerate(st.session_state.messages):
     with st.chat_message(message["role"]):
         if isinstance(message["content"], list):
             st.write_stream(message["content"])
         else:
             st.write(message["content"])
+    if message["role"] in ["ai", "assistant"]:
+        response_idx = str(i//2) # convert b/c JSON requires keys to be strings
+        if response_idx in st.session_state.feedback:
+            sentiment_mapping = [":material/thumb_down:", ":material/thumb_up:"]
+            st.markdown(sentiment_mapping[st.session_state.feedback[response_idx]])
+        else:
+            st.feedback(options="thumbs", key=f"feedback-{response_idx}", on_change=save_feedback, kwargs={"response_idx": response_idx})
 
 # React to user input
 if prompt := st.chat_input("What are you shopping for?"):
