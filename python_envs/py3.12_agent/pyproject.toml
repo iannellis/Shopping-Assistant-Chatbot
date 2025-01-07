@@ -13,8 +13,9 @@ fastapi = "^0.115.6"
 uvicorn = "^0.34.0"
 langchain-ollama = "^0.2.2"
 langgraph = "^0.2.60"
-chromadb-client = "^0.5.23"
 pandas = "^2.2.3"
+chromadb-client = "^0.6.1"
+light-embed = "^1.0.7"
 
 [build-system]
 requires = ["poetry-core"]
