@@ -1,5 +1,6 @@
 from langchain_ollama import ChatOllama
 import chromadb
+from light_embed import TextEmbedding
 import numpy as np
 import pandas as pd
 
@@ -46,17 +47,25 @@ class Chroma_Collection_Connection():
         embedding_len = 768 * 4
         embedding_test = [1] * embedding_len
         multimodal_collection_name = 'blip_2_'+blip_2_model+'_multimodal'
-        print('Using Chroma collection ' + multimodal_collection_name)
+        print('Using Chroma multimodal collection ' + multimodal_collection_name)
         collection_multimodal = client.get_collection(name=multimodal_collection_name)
         _ = collection_multimodal.query(query_embeddings=[embedding_test], include=["metadatas"], n_results=n_return)
-
-        collection_text = client.get_collection(name='text_only')
+        
+        embedding_len = 384
+        embedding_test = [1] * embedding_len
+        text_collection_name = 'text_only'
+        print('Using Chroma text collection ' + text_collection_name)
+        model = TextEmbedding('onnx-models/all-MiniLM-L6-v2-onnx')
+        text_embed_fcn = model.encode
+        collection_text = client.get_collection(name=text_collection_name)
+        _ = collection_text.query(query_embeddings=[embedding_test], include=[], n_results=max_items)
 
         self.collection_multimodal = collection_multimodal
         self.collection_text = collection_text
         self.max_return_items = max_items
         self.n_return = n_return
         
+        self.text_embed_fcn = text_embed_fcn
         self.blip_2_connection = Blip_2_Connection()
         
     def query_image_text(self, image_b64=None, text=None) -> dict:
@@ -68,7 +77,8 @@ class Chroma_Collection_Connection():
     
     def query_text(self, text=None) -> list[str]:
         """Get the text-only documents of the top CHROMA_MAX_ITEMS matching the query."""
-        query_return = self.collection_text.query(query_texts=[text], include=[], n_results=self.max_return_items)
+        embeddings = self.text_embed_fcn(text)
+        query_return = self.collection_text.query(query_embeddings=[embeddings], include=[], n_results=self.max_return_items)
         return query_return['ids'][0]
     
     def _query_multimodal_embeddings(self, embeddings: np.array) -> dict:
