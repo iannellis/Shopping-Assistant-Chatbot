@@ -14,13 +14,13 @@ listing_tarfile = "../../ABO_dataset/abo-listings.tar"
 working_dir = "../../../ShopTalk-blobs/ABO_dataset/"
 meta_save_prefix = "abo-listings"
 
+#-------------------------Work-performing Functions-------------------------------------
 def read_json_from_tar(tar_file):
     """Read all the metadata in from the listing tarfile and save in a Pandas dataframe."""
     dflist = []
     with tarfile.open(tar_file, 'r') as tar:
         for member in tqdm(tar.getmembers()):
             if member.name.endswith('json.gz'):
-                #print(f"Reading {member.name}...")
                 # Extract the gz file in memory
                 f = tar.extractfile(member)
                 if f is not None:
@@ -52,7 +52,7 @@ def drop_non_eng_vals(value):
         return english_items
     return value
 
-
+#-------------------------------Operate on metadata-------------------------------------
 print('Reading in data from tarfile...')
 pdf = read_json_from_tar(listing_tarfile)
 pdf = pdf.drop(columns=['model_number', 'color_code', 'node', 'item_dimensions',
