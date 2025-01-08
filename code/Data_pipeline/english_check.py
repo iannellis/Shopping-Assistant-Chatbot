@@ -5,6 +5,13 @@ from google.cloud import translate_v2 as translate
 import pandas as pd
 from tqdm import tqdm
 
+"""Run English-language checks on the metadata using Google's MediaPipe and optionally
+Google Cloud language detection.
+
+Note that Google Cloud language detection requires a Google Cloud account, installation
+of the gcloud CLI, and logging in via the CLI: 
+https://cloud.google.com/python/docs/setup#installing_the_cloud_sdk"""
+
 working_dir = "../../../ShopTalk-blobs/ABO_dataset/"
 meta_save_prefix = "abo-listings-"
 cloud_language_detection = True
@@ -59,7 +66,7 @@ def detect_language_google_cloud(text_for_detection, indexes):
     return pd.DataFrame(cloud_detection_results).set_index('index')
 
 print('Loading English-language metadata...')
-pdf = pd.read_pickle(working_dir + meta_save_prefix + "english-tags.pkl")
+pdf = pd.read_pickle(working_dir + meta_save_prefix + "preprocess-2.pkl")
 print('Converting metadata rows to text...')
 text_for_detection = [row_to_text(pdf.loc[item_id]) for item_id in tqdm(pdf.index)]
 print('Running MediaPipe language detection...')
@@ -75,7 +82,7 @@ if cloud_language_detection:
 else:
     non_eng_idxs = mediapipe_languages[mediapipe_languages['languages'] != 'en'].index
 
-print('Dropping rows detected as non-English...')    
+print('Dropping rows detected as non-English...')
 pdf = pdf.drop(pdf.index[non_eng_idxs])
 print('Saving verified English metadata...')
-pdf.to_pickle("../../../Capstone Project - ShopTalk/ABO_dataset/abo-listings-verified-english.pkl")
+pdf.to_pickle(working_dir + meta_save_prefix + "preprocess-3.pkl")
