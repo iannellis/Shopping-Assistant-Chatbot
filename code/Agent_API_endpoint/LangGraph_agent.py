@@ -4,7 +4,6 @@ from langgraph.graph import END, StateGraph, MessagesState
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.memory import MemorySaver
 
-# from icecream import ic
 from collections import defaultdict
 
 from util import Chroma_Collection_Connection, connect_ollama_llm, ABO_Dataset
@@ -34,17 +33,13 @@ def retrieve_products(query: str | dict):
     """Call with a query about a product a user might shop for to get possible
     matches and details about those matches. The query may be up to a sentence long. 
     In any other circumstance, call with an empty string: ''."""
-    # ic("In retrieve_products")
     if isinstance(query, str):
-        # ic(query)
         if not query:
             # streaming dirty hack
             return '', []
         match_item_ids = chroma_collection.query_text(text=query)
     elif isinstance(query, dict):
-        # ic(query["text"])
         match_item_ids = chroma_collection.query_image_text(**query)   
-        # ic(match_item_ids)
     else:
         raise Exception('Invalid query type')
     
@@ -53,7 +48,6 @@ def retrieve_products(query: str | dict):
         return 'No matching products found.', [] 
     image_item_pairs_data = abo_dataset.get_items_data(match_item_ids)
     
-    # ic(image_item_pairs_data)
     images_b64 = []
     product_data = []
     for i, pair in enumerate(image_item_pairs_data):
@@ -74,7 +68,6 @@ def query_or_respond(state: MessagesState):
         image_b64 = last_message.additional_kwargs.pop("image_b64")
         
     # Provide system prompt, bind tool, and invoke model
-    # ic('In query_or_respond')
     if image_b64:
         primary_system_prompt = (
             'You are a helpful shopping assistant. The user is providing information '
@@ -111,10 +104,8 @@ def query_or_respond(state: MessagesState):
     ]
 
     prompt = [SystemMessage(primary_system_prompt)] + conversation_messages
-    # ic(prompt)
     llm_with_tools = llm.bind_tools([retrieve_products])
     response = llm_with_tools.invoke(prompt)
-    # ic(response)
     # hack in a response so the user isn't left waiting
     if response.tool_calls and response.tool_calls[0]['args']['query'] and image_b64:
         original_query = response.tool_calls[0]['args']['query']
@@ -144,11 +135,8 @@ def generate(state: MessagesState):
         or (message.type == "ai" and not message.tool_calls)
     ]
 
-    # ic(tool_messages)
     # Format into prompt
-    # ic(conversation_messages)
     docs_content = "\n\n".join(doc.content for doc in tool_messages)
-    # ic(docs_content)
     if docs_content:
         system_message_content = (
             'You are being provided an enumerated list of products. Briefly tell the '
@@ -182,9 +170,7 @@ def generate(state: MessagesState):
         prompt = conversation_messages
 
     # Run
-    # ic(prompt)
     response = llm.invoke(prompt)
-    # ic(response)
     return {"messages": [response]}
 
 # Compile application and test
