@@ -1,9 +1,5 @@
-from mediapipe.tasks import python
-from mediapipe.tasks.python import text
-
 import tarfile
 import gzip
-import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
