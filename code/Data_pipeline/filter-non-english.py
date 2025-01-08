@@ -8,7 +8,7 @@ warnings.filterwarnings('ignore')
 
 listing_tarfile = "../../ABO_dataset/abo-listings.tar"
 working_dir = "../../../ShopTalk-blobs/ABO_dataset/"
-meta_save_prefix = "abo-listings"
+meta_save_prefix = "abo-listings-"
 
 #-------------------------Work-performing Functions-------------------------------------
 def read_json_from_tar(tar_file):
@@ -61,5 +61,5 @@ for col in tqdm(pdf.columns):
         pdf[col][i] = drop_non_eng_vals(pdf[col][i])
 
 print('Saving intermediate metadata results...')
-pdf.to_pickle(working_dir + meta_save_prefix + "-english-tags.pkl")
+pdf.to_pickle(working_dir + meta_save_prefix + "english-tags.pkl")
 
