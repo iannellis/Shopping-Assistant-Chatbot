@@ -6,12 +6,14 @@ from tqdm import tqdm
 import warnings
 warnings.filterwarnings('ignore')
 
+"""Filter out non-English tagged items"""
+
 listing_tarfile = "../../ABO_dataset/abo-listings.tar"
 working_dir = "../../../ShopTalk-blobs/ABO_dataset/"
 meta_save_prefix = "abo-listings-"
 
 #-------------------------Work-performing Functions-------------------------------------
-def read_json_from_tar(tar_file):
+def read_meta_from_tar(tar_file):
     """Read all the metadata in from the listing tarfile and save in a Pandas dataframe."""
     dflist = []
     with tarfile.open(tar_file, 'r') as tar:
@@ -48,9 +50,11 @@ def drop_non_eng_vals(value):
         return english_items
     return value
 
+
+
 #-------------------------------Operate on metadata-------------------------------------
 print('Reading in data from tarfile...')
-pdf = read_json_from_tar(listing_tarfile)
+pdf = read_meta_from_tar(listing_tarfile)
 pdf = pdf.drop(columns=['model_number', 'color_code', 'node', 'item_dimensions',
                         'spin_id', '3dmodel_id', 'item_shape'])
 
@@ -61,5 +65,5 @@ for col in tqdm(pdf.columns):
         pdf[col][i] = drop_non_eng_vals(pdf[col][i])
 
 print('Saving intermediate metadata results...')
-pdf.to_pickle(working_dir + meta_save_prefix + "english-tags.pkl")
+pdf.to_pickle(working_dir + meta_save_prefix + "preprocess-1.pkl")
 
