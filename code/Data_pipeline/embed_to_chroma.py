@@ -48,22 +48,22 @@ def run_embeddings(abo_images_dir='/mnt/d/abo-dataset/images/small',
     model.to(device)
 
     dataloader_multimodal = build_abo_dataloader_multimodal(
-        abo_images_dir, metadata_df_file, image_metadata_file, image_processor=vis_processor, 
+        abo_images_dir, metadata_df_file, images_metadata_file, image_processor=vis_processor, 
         text_processor=text_processor, batch_size=batch_size, num_workers=2)
        
     embed_multimodal(model, dataloader_multimodal, device, embeddings_save_path, model_selection)
     return
 
-def build_abo_dataloader_multimodal(images_dir: str, metadata_file: str, image_metadata_file: str, 
+def build_abo_dataloader_multimodal(images_dir: str, metadata_file: str, images_metadata_file: str, 
                          image_processor: callable, text_processor: callable, 
                          batch_size=64, num_workers=2) -> DataLoader:
     """Load the data to build the multimodal (image + text) dataloader for the ABO dataset
     and build it."""
     metadata = pd.read_pickle(metadata_file)
-    image_metadata = pd.read_csv(image_metadata_file).set_index('image_id')
+    images_metadata = pd.read_csv(images_metadata_file).set_index('image_id')
     image_item_pairs = abo_image_item_pairs(metadata)
     
-    dataset_multimodal = ABODataset_multimodal(images_dir, metadata, image_metadata,
+    dataset_multimodal = ABODataset_multimodal(images_dir, metadata, images_metadata,
                                                    image_item_pairs, image_processor, text_processor)
     dataloader_multimodal = DataLoader(dataset=dataset_multimodal, batch_size=batch_size,
                                        num_workers=num_workers)
