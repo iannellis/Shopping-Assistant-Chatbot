@@ -12,6 +12,7 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 import tomllib
+import gzip
 
 #----------------------------------Load the model---------------------------------------
 model_id = "meta-llama/Llama-3.2-11B-Vision-Instruct"
@@ -177,8 +178,13 @@ if __name__ == "__main__":
     n_products = len(pdf_has_images)
     
     print('Loading image metadata...')
-    image_meta_path = abo_dataset_dir + '/images/metadata/images.csv'
-    image_meta_df = pd.read_csv(image_meta_path).set_index('image_id')
+    try:
+        image_meta_path = abo_dataset_dir + '/images/metadata/images.csv'
+        image_meta_df = pd.read_csv(image_meta_path).set_index('image_id')
+    except FileNotFoundError:
+        image_meta_path = abo_dataset_dir + '/images/metadata/images.csv.gz'
+        with gzip.open(image_meta_path, 'rt') as f:
+            image_meta_df = pd.read_csv(f).set_index('image_id')
     
     print('Verifying product_type using a Llama-vision model...')
     image_path_prefix = abo_dataset_dir + '/images/small/'
