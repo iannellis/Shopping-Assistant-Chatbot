@@ -63,8 +63,9 @@ if __name__ == "__main__":
     pdf = pdf.drop(columns=['model_number', 'color_code', 'node', 'item_dimensions',
                             'spin_id', '3dmodel_id', 'item_shape'])
 
-    print('Filtering non-English values...')
+    print('Filtering out rows without English tags...')
     pdf = pdf[[has_english_tag(pdf.loc[item_id]) for item_id in tqdm(pdf.index)]]
+    print('Filtering non-English tags from remaining rows...')
     for col in tqdm(pdf.columns):
         for i in range(len(pdf[col])):
             pdf[col][i] = drop_non_eng_vals(pdf[col][i])
