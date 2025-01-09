@@ -14,6 +14,9 @@ from tqdm import tqdm
 import tomllib
 import gzip
 
+import warnings
+warnings.filterwarnings('ignore')
+
 #----------------------------------Load the model---------------------------------------
 model_id = "meta-llama/Llama-3.2-11B-Vision-Instruct"
 

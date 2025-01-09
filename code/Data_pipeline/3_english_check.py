@@ -13,6 +13,9 @@ import pandas as pd
 from tqdm import tqdm
 import tomllib
 
+import warnings
+warnings.filterwarnings('ignore')
+
 #-------------------------Work-performing Functions-------------------------------------
 def row_to_str(row):
     """Convert a metadata dataframe row to a string for use in the language detectors."""
@@ -94,7 +97,7 @@ if __name__ == "__main__":
     else:
         non_eng_idxs = mediapipe_languages[mediapipe_languages['languages'] != 'en'].index
 
-    print('Dropping rows detected as non-English...')
+    print(f'Dropping {len(non_eng_idxs)} rows detected as non-English...')
     pdf = pdf.drop(pdf.index[non_eng_idxs])
     
     print('Saving verified English metadata...')

@@ -17,6 +17,9 @@ from tqdm import tqdm
 import pickle
 import tomllib
 
+import warnings
+warnings.filterwarnings('ignore')
+
 #-------------------------Work-performing Functions-------------------------------------
 def run_embeddings(abo_images_dir='/mnt/d/abo-dataset/images/small',
                    images_metadata_file='/mnt/d/abo-dataset/images/metadata/images.csv',

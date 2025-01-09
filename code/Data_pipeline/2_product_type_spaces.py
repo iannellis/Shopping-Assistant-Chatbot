@@ -1,8 +1,8 @@
 import pandas as pd
 import tomllib
 
-working_dir = "../../../ShopTalk-blobs/ABO_dataset/"
-meta_save_prefix = "abo-listings-"
+import warnings
+warnings.filterwarnings('ignore')
 
 #-------------------------Work-performing Functions-------------------------------------
 def fix_product_type(pdf):
