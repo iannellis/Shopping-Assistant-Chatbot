@@ -1,3 +1,5 @@
+"""Filter out non-English tagged items from the metadata"""
+
 import tarfile
 import gzip
 import pandas as pd
@@ -6,7 +8,7 @@ from tqdm import tqdm
 import warnings
 warnings.filterwarnings('ignore')
 
-"""Filter out non-English tagged items"""
+
 
 listing_tarfile = "../../ABO_dataset/abo-listings.tar"
 working_dir = "../../../ShopTalk-blobs/ABO_dataset/"
@@ -65,5 +67,5 @@ for col in tqdm(pdf.columns):
         pdf[col][i] = drop_non_eng_vals(pdf[col][i])
 
 print('Saving intermediate metadata results...')
-pdf.to_pickle(working_dir + meta_save_prefix + "preprocess-1.pkl")
+pdf.to_pickle(working_dir + '/' + meta_save_prefix + "/preprocess-1.pkl")
 

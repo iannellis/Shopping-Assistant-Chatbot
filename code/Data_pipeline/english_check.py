@@ -1,16 +1,16 @@
+"""Run English-language checks on the metadata using Google's MediaPipe and optionally
+Google Cloud language detection.
+
+Note that Google Cloud language detection requires a Google Cloud account with the
+Cloud Translation API enabled, installation of the gcloud CLI, and logging in via the CLI: 
+https://cloud.google.com/python/docs/setup#installing_the_cloud_sdk"""
+
 from mediapipe.tasks import python
 from mediapipe.tasks.python import text
 from google.cloud import translate_v2 as translate
 
 import pandas as pd
 from tqdm import tqdm
-
-"""Run English-language checks on the metadata using Google's MediaPipe and optionally
-Google Cloud language detection.
-
-Note that Google Cloud language detection requires a Google Cloud account, installation
-of the gcloud CLI, and logging in via the CLI: 
-https://cloud.google.com/python/docs/setup#installing_the_cloud_sdk"""
 
 working_dir = "../../../ShopTalk-blobs/ABO_dataset/"
 meta_save_prefix = "abo-listings-"
@@ -65,8 +65,8 @@ def detect_language_google_cloud(text_for_detection, indexes):
         
     return pd.DataFrame(cloud_detection_results).set_index('index')
 
-print('Loading English-language metadata...')
-pdf = pd.read_pickle(working_dir + meta_save_prefix + "preprocess-2.pkl")
+print('Loading (supposed) English-language metadata with spaces in product_types...')
+pdf = pd.read_pickle(working_dir + '/' + meta_save_prefix + "/preprocess-2.pkl")
 print('Converting metadata rows to text...')
 text_for_detection = [row_to_text(pdf.loc[item_id]) for item_id in tqdm(pdf.index)]
 print('Running MediaPipe language detection...')
@@ -85,4 +85,4 @@ else:
 print('Dropping rows detected as non-English...')
 pdf = pdf.drop(pdf.index[non_eng_idxs])
 print('Saving verified English metadata...')
-pdf.to_pickle(working_dir + meta_save_prefix + "preprocess-3.pkl")
+pdf.to_pickle(working_dir + '/' + meta_save_prefix + "/preprocess-3.pkl")
