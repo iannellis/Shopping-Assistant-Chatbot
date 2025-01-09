@@ -11,13 +11,10 @@ from google.cloud import translate_v2 as translate
 
 import pandas as pd
 from tqdm import tqdm
-
-working_dir = "../../../ShopTalk-blobs/ABO_dataset/"
-meta_save_prefix = "abo-listings-"
-cloud_language_detection = True
+import tomllib
 
 #-------------------------Work-performing Functions-------------------------------------
-def row_to_text(row):
+def row_to_str(row):
     """Convert a metadata dataframe row to a string for use in the language detectors."""
     row_filtered = row.drop(labels=['brand', 'item_weight', 'model_name', 'product_type',
                                     'main_image_id', 'other_image_id', 'country', 
@@ -29,7 +26,7 @@ def row_to_text(row):
         else:
             text.append(item)
     
-    return ' '.join(text).replace('\n', ' ')
+    return ' '.join(text).replace('\n', ' ').replace('^', ' ').replace(',', ', ')
 
 def mediapipe_detection(text_for_detection):
     """Run MediaPipe to detect the language of a row of data. Returns a dataframe with
@@ -65,24 +62,40 @@ def detect_language_google_cloud(text_for_detection, indexes):
         
     return pd.DataFrame(cloud_detection_results).set_index('index')
 
-print('Loading (supposed) English-language metadata with spaces in product_types...')
-pdf = pd.read_pickle(working_dir + '/' + meta_save_prefix + "/preprocess-2.pkl")
-print('Converting metadata rows to text...')
-text_for_detection = [row_to_text(pdf.loc[item_id]) for item_id in tqdm(pdf.index)]
-print('Running MediaPipe language detection...')
-mediapipe_languages = mediapipe_detection(text_for_detection)
+#-------------------------------Operate on metadata-------------------------------------
+if __name__ == "__main__":
+    print('3. Using a model (MediaPipe from Google the optionaly Google Cloud language detection), '
+          'verify that every row of metadata is in English and filter out those that aren\'t.')
+    
+    with open('config.toml', 'rb') as f:
+        config = tomllib.load(f)
 
-if cloud_language_detection:
-    print('Running cloud detection on non-English MediaPipe results...')
-    indexes_for_cloud_detection = mediapipe_languages[mediapipe_languages['languages'] != 'en'].index
-    cloud_detection_results_df = detect_language_google_cloud(text_for_detection, indexes_for_cloud_detection)
-    print('Saving cloud detection results...')
-    cloud_detection_results_df.to_pickle(working_dir + meta_save_prefix + "cloud-language-detections.pkl")
-    non_eng_idxs = cloud_detection_results_df[cloud_detection_results_df['languages'] != 'en'].index
-else:
-    non_eng_idxs = mediapipe_languages[mediapipe_languages['languages'] != 'en'].index
+    working_dir = config['global']['working_dir']
+    meta_save_prefix = config['global']['meta_save_prefix']
+    cloud_language_detection = config['english_check']['cloud_language_detection']
+    
+    print('Loading (supposed) English-language metadata with spaces in product_types...')
+    pdf = pd.read_pickle(working_dir + '/' + meta_save_prefix + "preprocess-2.pkl")
+    
+    print('Converting metadata rows to text...')
+    text_for_detection = [row_to_str(pdf.loc[item_id]) for item_id in tqdm(pdf.index)]
+    
+    print('Running MediaPipe language detection...')
+    mediapipe_languages = mediapipe_detection(text_for_detection)
 
-print('Dropping rows detected as non-English...')
-pdf = pdf.drop(pdf.index[non_eng_idxs])
-print('Saving verified English metadata...')
-pdf.to_pickle(working_dir + '/' + meta_save_prefix + "/preprocess-3.pkl")
+    if cloud_language_detection:
+        print('Running cloud detection on non-English MediaPipe results...')
+        indexes_for_cloud_detection = mediapipe_languages[mediapipe_languages['languages'] != 'en'].index
+        cloud_detection_results_df = detect_language_google_cloud(text_for_detection, indexes_for_cloud_detection)
+       
+        print('Saving cloud detection results...')
+        cloud_detection_results_df.to_pickle(working_dir + meta_save_prefix + "cloud-language-detections.pkl")
+        non_eng_idxs = cloud_detection_results_df[cloud_detection_results_df['languages'] != 'en'].index
+    else:
+        non_eng_idxs = mediapipe_languages[mediapipe_languages['languages'] != 'en'].index
+
+    print('Dropping rows detected as non-English...')
+    pdf = pdf.drop(pdf.index[non_eng_idxs])
+    
+    print('Saving verified English metadata...')
+    pdf.to_pickle(working_dir + '/' + meta_save_prefix + "preprocess-3.pkl")

@@ -1,8 +1,10 @@
 import pandas as pd
+import tomllib
 
 working_dir = "../../../ShopTalk-blobs/ABO_dataset/"
 meta_save_prefix = "abo-listings-"
 
+#-------------------------Work-performing Functions-------------------------------------
 def fix_product_type(pdf):
     """The product_type often has underscores or no spaces at all between words. This
     function fixes that.
@@ -21,11 +23,21 @@ def fix_product_type(pdf):
     pdf['product_type'] = pdf['product_type'].str.replace('ABIS ', '')
     return pdf
 
-print('Loading English-tagged metadata...')
-pdf = pd.read_pickle(working_dir + '/' + meta_save_prefix + "/preprocess-1.pkl")
+#-------------------------------Operate on metadata-------------------------------------
+if __name__ == "__main__":
+    print('2. Replace "_" with " " and add spaces where necessary in product_type in metadata.')
+    
+    with open('config.toml', 'rb') as f:
+        config = tomllib.load(f)
 
-print('Separating product_type words...')
-pdf = fix_product_type(pdf)
+    working_dir = config['global']['working_dir']
+    meta_save_prefix = config['global']['meta_save_prefix']
 
-print('Saving metadata with fixed product types...')
-pdf.to_pickle(working_dir + '/' + meta_save_prefix + "/preprocess-2.pkl")
+    print('Loading English-tagged metadata...')
+    pdf = pd.read_pickle(working_dir + '/' + meta_save_prefix + "preprocess-1.pkl")
+
+    print('Separating product_type words...')
+    pdf = fix_product_type(pdf)
+
+    print('Saving metadata with fixed product types...')
+    pdf.to_pickle(working_dir + '/' + meta_save_prefix + "preprocess-2.pkl")

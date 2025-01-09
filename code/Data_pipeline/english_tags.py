@@ -48,12 +48,18 @@ def drop_non_eng_vals(value):
 
 #-------------------------------Operate on metadata-------------------------------------
 if __name__ == "__main__":
+    print('1. Filter non-English tags out of metadata.')   
+    
     with open('config.toml', 'rb') as f:
         config = tomllib.load(f)
     
-    print('Reading in data from tarfile...')
-    listing_dir = config['global']['abo_dataset_dir'] + '/listings'
-    pdf = read_meta(listing_dir)
+    working_dir = config['global']['working_dir']
+    meta_save_prefix = config['global']['meta_save_prefix']
+    abo_dataset_dir = config['global']['abo_dataset_dir']
+    
+    print('Reading in metadata from listings...')
+    listings_dir = abo_dataset_dir + '/listings'
+    pdf = read_meta(listings_dir)
     pdf = pdf.drop(columns=['model_number', 'color_code', 'node', 'item_dimensions',
                             'spin_id', '3dmodel_id', 'item_shape'])
 
@@ -64,7 +70,6 @@ if __name__ == "__main__":
             pdf[col][i] = drop_non_eng_vals(pdf[col][i])
 
     print('Saving intermediate metadata results...')
-    working_dir = config['global']['working_dir']
-    meta_save_prefix = config['global']['meta_save_prefix']
-    pdf.to_pickle(working_dir + '/' + meta_save_prefix + "/preprocess-1.pkl")
+
+    pdf.to_pickle(working_dir + '/' + meta_save_prefix + "preprocess-1.pkl")
 

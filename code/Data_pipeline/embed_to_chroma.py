@@ -10,15 +10,16 @@ from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 import pandas as pd
 import numpy as np
+import chromadb
 
 import os
 from tqdm import tqdm
 import pickle
+import tomllib
 
-import chromadb
-
+#-------------------------Work-performing Functions-------------------------------------
 def run_embeddings(abo_images_dir='/mnt/d/abo-dataset/images/small',
-                   image_metadata_file='/mnt/d/abo-dataset/images/metadata/images.csv',
+                   images_metadata_file='/mnt/d/abo-dataset/images/metadata/images.csv',
                    metadata_df_file='/mnt/d/abo-dataset/abo-listings-final-draft.pkl',
                    models_dir='/mnt/d/models/', model_selection='gs', device='cuda',
                    embeddings_save_path='/mnt/d/embeddings/', batch_size=64):
@@ -225,18 +226,36 @@ def load_text_to_chroma(collection, metadata_df_file):
             row_str = row_to_str(metadata_df.iloc[i])
             rows_to_add.append(row_str)
         collection.add(documents=rows_to_add, ids=list(metadata_df.index[start:end]))
-        
-embeddings_dir='/mnt/d/embeddings/'
-model_selection='gs'
-print('Running multimodal embeddings...')
-run_embeddings(abo_images_dir='/mnt/d/abo-dataset/images/small',
-                   image_metadata_file='/mnt/d/abo-dataset/images/metadata/images.csv',
-                   metadata_df_file='/mnt/d/abo-dataset/abo-listings-final-draft.pkl',
-                   models_dir='/mnt/d/models/', model_selection=model_selection, device='cuda',
-                   embeddings_save_path=embeddings_dir, batch_size=64)
-print('Loading the multimodal embeddings into the Chroma database...')
-client=chromadb.PersistentClient(path="/mnt/d/chroma")
-collection=client.get_or_create_collection(name='blip_2_'+model_selection+'_multimodal')
-load_multimodal_to_chroma(collection, embeddings_dir, model_selection)
-print('Loading the items into the text-only Chroma database...')
-collection=client.get_or_create_collection(name="text_only")
+
+#-------------------------------Run the operation---------------------------------------
+if __name__ == "__main__":
+    with open('config.toml', 'rb') as f:
+        config = tomllib.load(f)
+
+    print('Running multimodal embeddings...')
+    working_dir = config['global']['working_dir']
+    meta_save_prefix = config['global']['meta_save_prefix']
+    abo_dataset_dir = config['global']['abo_dataset_dir']
+    models_dir = config["embed_to_chroma"]["models_dir"]
+    model_selection = config["embed_to_chroma"]["model_selection"]
+    model_device = config["embed_to_chroma"]["model_device"]
+    embeddings_dir = config["embed_to_chroma"]["embeddings_dir"]
+    batch_size = config["embed_to_chroma"]["batch_size"]
+    chroma_dir = config["embed_to_chroma"]["chroma_dir"]
+    
+    abo_images_dir = abo_dataset_dir + '/images/small'
+    images_metadata_file = abo_dataset_dir + '/images/metadata/images.csv'
+    metadata_df_file = abo_dataset_dir + '/' + meta_save_prefix + 'preprocess-4.pkl'
+    
+    run_embeddings(abo_images_dir=abo_images_dir, images_metadata_file=images_metadata_file,
+                    metadata_df_file=metadata_df_file, models_dir=models_dir,
+                    model_selection=model_selection, device=model_device,
+                    embeddings_save_path=embeddings_dir, batch_size=batch_size)
+    
+    print('Loading the multimodal embeddings into the Chroma database...')
+    client=chromadb.PersistentClient(path=chroma_dir)
+    collection=client.get_or_create_collection(name='blip_2_'+model_selection+'_multimodal')
+    load_multimodal_to_chroma(collection, embeddings_dir, model_selection)
+    
+    print('Loading the items into the text-only Chroma database...')
+    collection=client.get_or_create_collection(name="text_only")
