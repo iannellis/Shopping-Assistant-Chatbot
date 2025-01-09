@@ -84,8 +84,8 @@ if __name__ == "__main__":
     mediapipe_languages = mediapipe_detection(text_for_detection)
 
     if cloud_language_detection:
-        print('Running cloud detection on non-English MediaPipe results...')
         indexes_for_cloud_detection = mediapipe_languages[mediapipe_languages['languages'] != 'en'].index
+        print(f'Running cloud detection on {len(indexes_for_cloud_detection)} non-English MediaPipe results...')
         cloud_detection_results_df = detect_language_google_cloud(text_for_detection, indexes_for_cloud_detection)
        
         print('Saving cloud detection results...')
