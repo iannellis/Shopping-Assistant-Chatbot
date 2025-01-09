@@ -1,6 +1,7 @@
-"""Filter out non-English tagged items from the metadata"""
-
-import tarfile
+"""Read the metadata from .json.gz files into a Pandas dataframe, filter out non-English
+tagged items, and save into a pickle file."""
+import tomllib
+import os
 import gzip
 import pandas as pd
 from tqdm import tqdm
@@ -8,25 +9,18 @@ from tqdm import tqdm
 import warnings
 warnings.filterwarnings('ignore')
 
-
-
-listing_tarfile = "../../ABO_dataset/abo-listings.tar"
-working_dir = "../../../ShopTalk-blobs/ABO_dataset/"
-meta_save_prefix = "abo-listings-"
-
 #-------------------------Work-performing Functions-------------------------------------
-def read_meta_from_tar(tar_file):
-    """Read all the metadata in from the listing tarfile and save in a Pandas dataframe."""
+def read_meta(abo_listing_dir):
+    """Read all the metadata in from the listing metadata dir and save in a Pandas
+    dataframe. Expects the json files to be somewhere in abo_listing_dir compressed in
+    gzip format."""
     dflist = []
-    with tarfile.open(tar_file, 'r') as tar:
-        for member in tqdm(tar.getmembers()):
-            if member.name.endswith('json.gz'):
-                # Extract the gz file in memory
-                f = tar.extractfile(member)
-                if f is not None:
-                  with gzip.open(f, 'rt') as f:
-                    df = pd.read_json(f, lines=True)
-                    dflist.append(df)
+    for root, dirs, files in os.walk(abo_listing_dir):
+        fnames = [fname for fname in files if fname.endswith('.json.gz')]
+        for fname in tqdm(fnames):
+            with gzip.open(os.path.join(root, fname), 'rt') as f:
+                df = pd.read_json(f, lines=True)
+                dflist.append(df)
     pdf = pd.concat(dflist).set_index('item_id')
     return pdf
 
@@ -52,20 +46,25 @@ def drop_non_eng_vals(value):
         return english_items
     return value
 
-
-
 #-------------------------------Operate on metadata-------------------------------------
-print('Reading in data from tarfile...')
-pdf = read_meta_from_tar(listing_tarfile)
-pdf = pdf.drop(columns=['model_number', 'color_code', 'node', 'item_dimensions',
-                        'spin_id', '3dmodel_id', 'item_shape'])
+if __name__ == "__main__":
+    with open('config.toml', 'rb') as f:
+        config = tomllib.load(f)
+    
+    print('Reading in data from tarfile...')
+    listing_dir = config['global']['abo_dataset_dir'] + '/listings'
+    pdf = read_meta(listing_dir)
+    pdf = pdf.drop(columns=['model_number', 'color_code', 'node', 'item_dimensions',
+                            'spin_id', '3dmodel_id', 'item_shape'])
 
-print('Filtering non-English values...')
-pdf = pdf[[has_english_tag(pdf.loc[item_id]) for item_id in tqdm(pdf.index)]]
-for col in tqdm(pdf.columns):
-    for i in range(len(pdf[col])):
-        pdf[col][i] = drop_non_eng_vals(pdf[col][i])
+    print('Filtering non-English values...')
+    pdf = pdf[[has_english_tag(pdf.loc[item_id]) for item_id in tqdm(pdf.index)]]
+    for col in tqdm(pdf.columns):
+        for i in range(len(pdf[col])):
+            pdf[col][i] = drop_non_eng_vals(pdf[col][i])
 
-print('Saving intermediate metadata results...')
-pdf.to_pickle(working_dir + '/' + meta_save_prefix + "/preprocess-1.pkl")
+    print('Saving intermediate metadata results...')
+    working_dir = config['global']['working_dir']
+    meta_save_prefix = config['global']['meta_save_prefix']
+    pdf.to_pickle(working_dir + '/' + meta_save_prefix + "/preprocess-1.pkl")
 
