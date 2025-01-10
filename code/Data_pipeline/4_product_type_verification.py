@@ -48,10 +48,10 @@ def run_dataset_check(model, processor, pdf_has_images, image_meta_df, iloc_star
             image_categroy_match['product_type'].append(product_type)
             image_categroy_match['match'].append(match)
             
-        if i % 1000 == 0:
-            write_checkpoint(checkpoint_fpath)
+        if (i+1) % 1000 == 0:
+            write_checkpoint(image_categroy_match, checkpoint_fpath)
 
-    write_checkpoint(checkpoint_fpath)
+    write_checkpoint(image_categroy_match, checkpoint_fpath)
     
     return pd.DataFrame(image_categroy_match).set_index('image_id')
 
@@ -95,7 +95,7 @@ def resume_dataset_check(model, processor, pdf_has_images, image_meta_df, iloc_s
             image_categroy_match['match'].append(match)
             
         if (i+1) % 1000 == 0:
-            write_checkpoint(checkpoint_fpath)
+            write_checkpoint(image_categroy_match, checkpoint_fpath)
 
     write_checkpoint(image_categroy_match, checkpoint_fpath)
     
