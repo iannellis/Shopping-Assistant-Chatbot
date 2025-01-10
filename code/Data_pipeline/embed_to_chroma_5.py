@@ -40,10 +40,10 @@ def run_embeddings(abo_images_dir='/mnt/d/abo-dataset/images/small',
         batch_size (int, optional): The batch size for calculating the embeddings.
     """
     if model_selection == 'coco':
-        with open('../../assets/blip-2-processors-coco.pkl', 'rb') as f:
+        with open('assets/blip-2-processors-coco.pkl', 'rb') as f:
             vis_processor, text_processor = pickle.load(f)
     else:
-        with open('../../assets/blip-2-processors-pretrain.pkl', 'rb') as f:
+        with open('assets/blip-2-processors-pretrain.pkl', 'rb') as f:
             vis_processor, text_processor = pickle.load(f)
     model = torch.load(models_dir + "/blip-2-" + model_selection + ".pt")
     model.to(device)
@@ -236,7 +236,6 @@ if __name__ == "__main__":
     with open('pipeline_config.toml', 'rb') as f:
         config = tomllib.load(f)
 
-    print('Calculating multimodal embeddings...')
     working_dir = config['global']['working_dir']
     meta_save_prefix = config['global']['meta_save_prefix']
     abo_dataset_dir = config['global']['abo_dataset_dir']
@@ -253,6 +252,7 @@ if __name__ == "__main__":
         images_metadata_file = abo_dataset_dir + '/images/metadata/images.csv.gz'
     metadata_df_file = working_dir + '/' + meta_save_prefix + 'preprocess-4.pkl'
     
+    print('Calculating multimodal embeddings...')
     run_embeddings(abo_images_dir=abo_images_dir, images_metadata_file=images_metadata_file,
                     metadata_df_file=metadata_df_file, models_dir=models_dir,
                     model_selection=model_selection, device=model_device,
