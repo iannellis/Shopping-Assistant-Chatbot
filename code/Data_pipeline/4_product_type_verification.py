@@ -192,10 +192,9 @@ if __name__ == "__main__":
         image_meta_df = pd.read_csv(image_meta_path).set_index('image_id')
     except FileNotFoundError:
         image_meta_path = abo_dataset_dir + '/images/metadata/images.csv.gz'
-        with gzip.open(image_meta_path, 'rt') as f:
-            image_meta_df = pd.read_csv(f).set_index('image_id')
+        image_meta_df = pd.read_csv(image_meta_path).set_index('image_id')
     
-    print('Verifying product_type using a Llama-vision model...')
+    print('Verifying product_type using an LLM-Vision model...')
     image_path_prefix = abo_dataset_dir + '/images/small/'
     checkpoint_fpath = working_dir + '/' + checkpoint_name
     image_category_match_df = run_dataset_check(model, processor, pdf_has_images,
@@ -204,8 +203,8 @@ if __name__ == "__main__":
                                                 image_path_prefix=image_path_prefix,
                                                 checkpoint_fpath=checkpoint_fpath)
     
-    print("Dropping product_type for items where Llama-vision declared a majority of images don't match...")
     mismatch_item_ids = get_mismatch_item_ids(image_category_match_df)
+    print(f"Setting product_type to null for {len(mismatch_item_ids)} items where the LLM-Vision model declared a majority of images don't match...")
     pdf.loc[mismatch_item_ids, 'product_type'] = np.nan
     
     print("Saving final metadata results...")
