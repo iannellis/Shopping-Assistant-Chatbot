@@ -2,8 +2,8 @@
 Google Cloud language detection.
 
 Note that Google Cloud language detection requires a Google Cloud account with the
-Cloud Translation API enabled, installation of the gcloud CLI, and logging in via the CLI: 
-https://cloud.google.com/python/docs/setup#installing_the_cloud_sdk"""
+Cloud Translation API enabled, installation of the gcloud CLI, and logging in via the CLI:
+https://cloud.google.com/docs/authentication/set-up-adc-local-dev-environment"""
 
 from mediapipe.tasks import python
 from mediapipe.tasks.python import text
