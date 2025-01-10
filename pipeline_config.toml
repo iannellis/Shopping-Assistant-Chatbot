@@ -17,7 +17,7 @@ checkpoint_name = "abo-category-check.pkl"
 [embed_to_chroma]
 # Directory where the BLIP-2 models are located
 models_dir = "/mnt/d/models/"
-# BLIP-2 model to use for multimodal embeddings
+# BLIP-2 model to use for multimodal embeddings. Provided options are'gs', 'abo', 'pretrain', or 'coco'.
 model_selection = "gs"
 # Device to run BLIP-2 on. Options are usually "cuda" or "cpu."
 model_device = "cuda"
