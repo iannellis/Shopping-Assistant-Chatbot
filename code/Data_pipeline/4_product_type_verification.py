@@ -1,7 +1,8 @@
 """Run images and corresponding product_types through Llama-vision to check if the items
 are categorized correctly. Remove the product_type if not.
 
-Note that this file has a restart function to restart a run that crashed.
+Note that this file has a restart function to restart a run that crashed, but it is
+not yet setup to use it if the file is run directly.
 
 This code almost completely comes from the Llama_data_checks directory."""
 
@@ -17,30 +18,14 @@ import gzip
 import warnings
 warnings.filterwarnings('ignore')
 
-#----------------------------------Load the model---------------------------------------
-model_id = "meta-llama/Llama-3.2-11B-Vision-Instruct"
-
-quantization_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
-		bnb_4bit_compute_dtype=torch.bfloat16)
-
-model = MllamaForConditionalGeneration.from_pretrained(
-    model_id,
-    quantization_config=quantization_config,
-    torch_dtype=torch.bfloat16,
-    device_map="auto",
-    do_sample=True, # model can get inconsistent if we use defaults for last 3 options
-    temperature=0.01, 
-    top_p=0
-)
-processor = AutoProcessor.from_pretrained(model_id)
-
-
 #-------------------------Work-performing Functions-------------------------------------
-def run_dataset_check(pdf_has_images, image_meta_df, iloc_start, iloc_end, image_path_prefix,
-                      checkpoint_fpath):
+def run_dataset_check(model, processor, pdf_has_images, image_meta_df, iloc_start, iloc_end,
+                      image_path_prefix, checkpoint_fpath):
     """Run the dataset through the model, checking if each image matches the product_type.
 
     Args:
+        model: the LLM-vision model to use
+        processor: the pre- and post-processor of the text and image for the model
         pdf_has_images: the dataframe with the metadata just for products with images
         image_meta_df: maps image_ids to file locations
         iloc_start (int): the integer index in pdf_has_images to start the run at
@@ -57,7 +42,7 @@ def run_dataset_check(pdf_has_images, image_meta_df, iloc_start, iloc_end, image
         for image_id in image_ids:
             image_path = image_path_prefix + '/' + image_meta_df.loc[image_id, 'path']
             image = Image.open(image_path)
-            match = llama_check_image_category(product_type, image)
+            match = llama_check_image_category(model, processor, product_type, image)
             image_categroy_match['image_id'].append(image_id)
             image_categroy_match['item_id'].append(item_id)
             image_categroy_match['product_type'].append(product_type)
@@ -70,12 +55,14 @@ def run_dataset_check(pdf_has_images, image_meta_df, iloc_start, iloc_end, image
     
     return pd.DataFrame(image_categroy_match).set_index('image_id')
 
-def resume_dataset_check(pdf_has_images, image_meta_df, iloc_start, iloc_end, image_path_prefix,
-                         checkpoint_fpath):
+def resume_dataset_check(model, processor, pdf_has_images, image_meta_df, iloc_start,
+                         iloc_end, image_path_prefix, checkpoint_fpath):
     """Resume the run of the dataset through the model, checking if each image matches 
     the product_type.
 
     Args:
+        model: the LLM-vision model to use
+        processor: the pre- and post-processor of the text and image for the model
         pdf_has_images: the dataframe with the metadata just for products with images
         image_meta_df: maps image_ids to file locations
         iloc_start (int): the integer index in pdf_has_images to start the run at
@@ -101,7 +88,7 @@ def resume_dataset_check(pdf_has_images, image_meta_df, iloc_start, iloc_end, im
         for image_id in image_ids:
             image_path = image_path_prefix + '/' + image_meta_df.loc[image_id, 'path']
             image = Image.open(image_path)
-            match = llama_check_image_category(product_type, image)
+            match = llama_check_image_category(model, processor, product_type, image)
             image_categroy_match['image_id'].append(image_id)
             image_categroy_match['item_id'].append(item_id)
             image_categroy_match['product_type'].append(product_type)
@@ -124,7 +111,7 @@ def get_all_image_ids(row):
     
     return image_ids
 
-def llama_check_image_category(product_type, image):
+def llama_check_image_category(model, processor, product_type, image):
     """Given a product_type and a PIL image, run both through the model to check whether
     they match."""
     messages = [
@@ -167,6 +154,8 @@ def get_mismatch_item_ids(image_category_match_df):
 
 #-------------------------------Run the operation---------------------------------------
 if __name__ == "__main__":
+    print('4. Verify product_type is correct for each item, and set to null if not.')
+    
     with open('config.toml', 'rb') as f:
         config = tomllib.load(f)
         
@@ -174,6 +163,23 @@ if __name__ == "__main__":
     meta_save_prefix = config['global']['meta_save_prefix']
     abo_dataset_dir = config['global']['abo_dataset_dir']
     checkpoint_name = config['product_type_verification']['checkpoint_name']
+
+    print('Loading LLM-Vision model...')
+    model_id = "meta-llama/Llama-3.2-11B-Vision-Instruct"
+
+    quantization_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.bfloat16)
+
+    model = MllamaForConditionalGeneration.from_pretrained(
+        model_id,
+        quantization_config=quantization_config,
+        torch_dtype=torch.bfloat16,
+        device_map="auto",
+        do_sample=True, # model can get inconsistent if we use defaults for last 3 options
+        temperature=0.01, 
+        top_p=0
+    )
+    processor = AutoProcessor.from_pretrained(model_id)
 
     print('Loading verified English metadata...')
     pdf = pd.read_pickle(working_dir + '/' + meta_save_prefix + "preprocess-3.pkl")
@@ -192,7 +198,8 @@ if __name__ == "__main__":
     print('Verifying product_type using a Llama-vision model...')
     image_path_prefix = abo_dataset_dir + '/images/small/'
     checkpoint_fpath = working_dir + '/' + checkpoint_name
-    image_category_match_df = run_dataset_check(pdf_has_images, image_meta_df, iloc_start=0, 
+    image_category_match_df = run_dataset_check(model, processor, pdf_has_images,
+                                                image_meta_df, iloc_start=0, 
                                                 iloc_end=n_products, 
                                                 image_path_prefix=image_path_prefix,
                                                 checkpoint_fpath=checkpoint_fpath)
@@ -201,5 +208,5 @@ if __name__ == "__main__":
     mismatch_item_ids = get_mismatch_item_ids(image_category_match_df)
     pdf.loc[mismatch_item_ids, 'product_type'] = np.nan
     
-    print("Saving intermediate metadata results...")
+    print("Saving final metadata results...")
     pdf.to_pickle(working_dir + '/' + meta_save_prefix + "preprocess-4.pkl")
