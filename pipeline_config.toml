@@ -16,14 +16,14 @@ checkpoint_name = "abo-category-check.pkl"
 
 [embed_to_chroma]
 # Directory where the BLIP-2 models are located
-models_dir = "/mnt/d/models"
+models_dir = "/mnt/d/models/"
 # BLIP-2 model to use for multimodal embeddings
 model_selection = "gs"
 # Device to run BLIP-2 on. Options are usually "cuda" or "cpu."
 model_device = "cuda"
 # Where to save the temporary embeddings files
-embeddings_dir = "/mnt/d/embeddings"
+embeddings_dir = "/mnt/d/embeddings/"
 # Batch size for processing embeddings through model
 batch_size = 64
 # Directory where Chroma database is to be stored
-chroma_dir = "/mnt/d/chroma"
+chroma_dir = "/mnt/d/chroma/"
