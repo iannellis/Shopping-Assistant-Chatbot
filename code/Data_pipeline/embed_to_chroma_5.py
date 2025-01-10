@@ -233,7 +233,7 @@ if __name__ == "__main__":
     print('5. Calculate the multimodal embeddings and add to Chroma. Add all text metadata '
       'to a separate Chroma collection.')
     
-    with open('config.toml', 'rb') as f:
+    with open('pipeline_config.toml', 'rb') as f:
         config = tomllib.load(f)
 
     print('Calculating multimodal embeddings...')

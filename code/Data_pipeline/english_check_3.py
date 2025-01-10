@@ -70,7 +70,7 @@ if __name__ == "__main__":
     print('3. Using a model (MediaPipe from Google the optionaly Google Cloud language detection), '
           'verify that every row of metadata is in English and filter out those that aren\'t.')
     
-    with open('config.toml', 'rb') as f:
+    with open('pipeline_config.toml', 'rb') as f:
         config = tomllib.load(f)
 
     working_dir = config['global']['working_dir']

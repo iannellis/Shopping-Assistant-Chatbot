@@ -156,7 +156,7 @@ def get_mismatch_item_ids(image_category_match_df):
 if __name__ == "__main__":
     print('4. Verify product_type is correct for each item, and set to null if not.')
     
-    with open('config.toml', 'rb') as f:
+    with open('pipeline_config.toml', 'rb') as f:
         config = tomllib.load(f)
         
     working_dir = config['global']['working_dir']

@@ -50,7 +50,7 @@ def drop_non_eng_vals(value):
 if __name__ == "__main__":
     print('1. Filter non-English tags out of metadata.')   
     
-    with open('config.toml', 'rb') as f:
+    with open('pipeline_config.toml', 'rb') as f:
         config = tomllib.load(f)
     
     working_dir = config['global']['working_dir']

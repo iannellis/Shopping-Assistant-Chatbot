@@ -27,7 +27,7 @@ def fix_product_type(pdf):
 if __name__ == "__main__":
     print('2. Replace "_" with " " and add spaces where necessary in product_type in metadata.')
     
-    with open('config.toml', 'rb') as f:
+    with open('pipeline_config.toml', 'rb') as f:
         config = tomllib.load(f)
 
     working_dir = config['global']['working_dir']
