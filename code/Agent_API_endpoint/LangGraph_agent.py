@@ -57,7 +57,7 @@ def retrieve_products(query: str | dict):
             
 # Step 1: Generate an AIMessage that may include a tool-call to be sent.
 def query_or_respond(state: MessagesState):
-    """Generate tool call for retrieval or respond."""
+    """Generate tool call for retrieval or respond immediately."""
     messages = state['messages']
     last_message = messages[-1]
 

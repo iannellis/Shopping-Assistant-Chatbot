@@ -12,6 +12,7 @@ import pandas as pd
 from tqdm import tqdm
 from PIL import Image
 
+# load the LLM
 model_id = "meta-llama/Llama-3.2-11B-Vision-Instruct"
 
 quantization_config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
