@@ -2,7 +2,6 @@
 tagged items, and save into a pickle file."""
 import tomllib
 import os
-import gzip
 import pandas as pd
 from tqdm import tqdm
 
@@ -16,11 +15,10 @@ def read_meta(abo_listing_dir):
     gzip format."""
     dflist = []
     for root, dirs, files in os.walk(abo_listing_dir):
-        fnames = [fname for fname in files if fname.endswith('.json.gz')]
+        fnames = [fname for fname in files if fname.endswith('.json.gz') or fname.endswith('.json')]
         for fname in tqdm(fnames):
-            with gzip.open(os.path.join(root, fname), 'rt') as f:
-                df = pd.read_json(f, lines=True)
-                dflist.append(df)
+            df = pd.read_json(os.path.join(root, fname), lines=True)
+            dflist.append(df)
     pdf = pd.concat(dflist).set_index('item_id')
     return pdf
 
