@@ -3,8 +3,6 @@ them to a chroma database. Then add the text-only strings to the database.
 
 Note: must be run using the 3.11 Python environment
 """
-
-from lavis.models import load_model_and_preprocess
 import torch
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
@@ -31,7 +29,7 @@ def run_embeddings(abo_images_dir='/mnt/d/abo-dataset/images/small',
 
     Args:
         abo_images_dir (str, optional): The directory where the images of the ABO dataset are located
-        image_metadata_file (str, optional): The path to the csv file mapping image_id to image file
+        image_metadata_file (str, optional): The path to the file mapping image_id to image file
         metadata_df_file (str, optional): The path to the pickle file containing the dataframe
                                           of the pre-processed metadata
         model_type (str, optional): Which version of the BLIP-2 model to use. Options are
@@ -42,10 +40,10 @@ def run_embeddings(abo_images_dir='/mnt/d/abo-dataset/images/small',
         batch_size (int, optional): The batch size for calculating the embeddings.
     """
     if model_selection == 'coco':
-        with open('blip-2-processors-coco.pkl', 'rb') as f:
+        with open('../../assets/blip-2-processors-coco.pkl', 'rb') as f:
             vis_processor, text_processor = pickle.load(f)
     else:
-        with open('blip-2-processors-pretrain.pkl', 'rb') as f:
+        with open('../../assets/blip-2-processors-pretrain.pkl', 'rb') as f:
             vis_processor, text_processor = pickle.load(f)
     model = torch.load(models_dir + "/blip-2-" + model_selection + ".pt")
     model.to(device)
@@ -103,13 +101,13 @@ class ABODataset_multimodal(Dataset):
                  image_metadata: pd.DataFrame, image_item_pairs: pd.DataFrame,
                  image_processor: callable, text_processor: callable):
         self.image_dir = image_dir
-        self.metadata = metadata
+        self.metadata = reorg_metadata_columns(metadata)
         self.image_metadata = image_metadata
         self.image_processor = image_processor
         self.text_processor = text_processor
         self.image_item_pairs = image_item_pairs
         
-        self.metadata = reorg_metadata_columns(self.metadata)
+        
         
     def __len__(self):
         return len(self.image_item_pairs)
@@ -133,6 +131,7 @@ def reorg_metadata_columns(metadata):
                             'product_description', 'product_type', 'color',
                             'fabric_type', 'style', 'material',
                             'pattern', 'finish_type', 'bullet_point']]
+        return metadata
     
 def row_to_str(row):
     """Convert a row of metadata to a string the model can consume."""
@@ -181,12 +180,11 @@ def load_multimodal_to_chroma(collection, embeddings_dir, model_selection):
     Chroma database. We have a start_id to keep track of the ids (ints) across those 
     multiple files."""
     start_id = 0
-    embeddings_dir = 'D:/embeddings/'
     for file in os.listdir(embeddings_dir):
         if file.startswith('embeddings_'+model_selection+'_multimodal'):
             print(file)
             # start_id to keep track of the ids (ints) across files when adding to the database
-            start_id = embed_multimodal(collection, embeddings_dir + file, start_id)
+            start_id = load_multimodal_to_chroma_helper(collection, embeddings_dir + '/' + file, start_id)
 
 def load_multimodal_to_chroma_helper(collection, file, start_id):
     """Load the multimodal embeddings into the Chroma database. We have multiple files,
@@ -232,10 +230,13 @@ def load_text_to_chroma(collection, metadata_df_file):
 
 #-------------------------------Run the operation---------------------------------------
 if __name__ == "__main__":
+    print('5. Calculate the multimodal embeddings and add to Chroma. Add all text metadata '
+      'to a separate Chroma collection.')
+    
     with open('config.toml', 'rb') as f:
         config = tomllib.load(f)
 
-    print('Running multimodal embeddings...')
+    print('Calculating multimodal embeddings...')
     working_dir = config['global']['working_dir']
     meta_save_prefix = config['global']['meta_save_prefix']
     abo_dataset_dir = config['global']['abo_dataset_dir']
@@ -248,7 +249,9 @@ if __name__ == "__main__":
     
     abo_images_dir = abo_dataset_dir + '/images/small'
     images_metadata_file = abo_dataset_dir + '/images/metadata/images.csv'
-    metadata_df_file = abo_dataset_dir + '/' + meta_save_prefix + 'preprocess-4.pkl'
+    if not os.path.exists(images_metadata_file):
+        images_metadata_file = abo_dataset_dir + '/images/metadata/images.csv.gz'
+    metadata_df_file = working_dir + '/' + meta_save_prefix + 'preprocess-4.pkl'
     
     run_embeddings(abo_images_dir=abo_images_dir, images_metadata_file=images_metadata_file,
                     metadata_df_file=metadata_df_file, models_dir=models_dir,
@@ -262,3 +265,4 @@ if __name__ == "__main__":
     
     print('Loading the items into the text-only Chroma database...')
     collection=client.get_or_create_collection(name="text_only")
+    load_text_to_chroma(collection, metadata_df_file)
