@@ -153,7 +153,7 @@ class ABO_Dataset():
     """Class to load the ABO dataset metadata, perform operations on it, and load images
     when required."""
     def __init__(self):
-        abo_fname = "abo-listings-final-draft.pkl"
+        abo_fname = os.environ["ABO_LISTINGS_FILE"]
         abo_dir = os.environ["ABO_DIR_CONTAINER"]
         self.abo_meta, self.abo_product_images = self._load_metadata(abo_dir + '/' + abo_fname)
         self.abo_image_meta = pd.read_csv(abo_dir + '/images/metadata/images.csv').set_index('image_id')
