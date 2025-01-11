@@ -11,7 +11,7 @@ COPY python_envs/py3.12_agent/requirements.txt /app/
 
 RUN venv/bin/pip install --no-cache-dir -r requirements.txt
 
-COPY code/Agent_API_endpoint/* /app/
+COPY code/Agent/* /app/
 
 EXPOSE $AGENT_PORT
 
