@@ -5,7 +5,7 @@ SCRIPT_DIR=$(dirname "$(realpath "$0")")
 # Has variables we need
 source $SCRIPT_DIR/docker/.env
 
-declare -A MODEL_FILES MODEL_GOOGLE_IDS
+declare -A MODEL_FILES MODEL_GOOGLE_IDS CHROMA_FILES CHROMA_GOOGLE_IDS
 
 # Array of BLIP-2 models mapping to their file names and Google Drive IDs
 MODEL_FILES["pretrain"]="blip-2-pretrain.pt"
@@ -22,7 +22,7 @@ CHROMA_FILES["gs"]="chroma_gs.tar"
 CHROMA_FILES["abo"]="chroma_abo.tar"
 CHROMA_FILES["coco"]="chroma_coco.tar"
 CHROMA_GOOGLE_IDS["pretrain"]="13io3F5krf2HF8Ym__40unrNI8liZtG5b"
-CHROMA_GOOGLE_IDS["gs"]="1AaK7wi614jEPR1ZkvT33suw6OvpvqyEQ"
+CHROMA_GOOGLE_IDS["gs"]="1GFjwaOqIecG3F6LZC9fIO_zb7qNJISWi"
 CHROMA_GOOGLE_IDS["abo"]="13iPFG_QuOydoyGKZpFvZCD4Tl7RybEBC"
 CHROMA_GOOGLE_IDS["coco"]="1AcjQmAimO04Dj8pSCkwoVapBDB5zl2LX"
 
