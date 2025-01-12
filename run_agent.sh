@@ -136,6 +136,7 @@ if snap list | grep -q docker; then
 fi
 
 echo "Installing Docker via apt so it works with CUDA..."
+sudo apt remove containerd.io docker-compose-plugin -y
 sudo apt install docker.io docker-compose-v2 -y
 
 # build and run the docker system
