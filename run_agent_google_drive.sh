@@ -141,5 +141,7 @@ sudo apt install docker.io docker-compose-v2 -y
 
 # build and run the docker system
 cd "$SCRIPT_DIR"
+echo "Downloading and building Docker images..."
 docker compose -f docker/docker-compose.yml build
+echo "Starting Docker..."
 docker compose -f docker/docker-compose.yml up
