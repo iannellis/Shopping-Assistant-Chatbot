@@ -110,9 +110,10 @@ class Blip_2_Connection():
         response = None
         while not response:
             try:
-                response = requests.get(self.blip_2_url, timeout=5)
+                response = requests.get(self.blip_2_url)
             except requests.exceptions.ConnectionError:
                 print('Blip-2 endpoint does not appear to be running yet. Retrying')
+                sleep(2)
 
     def embed(self, image_b64: None, text: None) -> list | None:
         """Embed images and text using the BLIP-2 API endpoint"""
