@@ -101,7 +101,7 @@ s3download_file "${MODEL_FILES[$BLIP_2_MODEL]}" "${MODEL_S3_OBJS[$BLIP_2_MODEL]}
 
 # Download the Chroma database and extract it
 cd "$CHROMA_DIR_LOCAL"
-s3download_file "${CHROMA_FILES[$BLIP_2_MODEL]}" "${MODEL_S3_OBJS[$BLIP_2_MODEL]}"
+s3download_file "${CHROMA_FILES[$BLIP_2_MODEL]}" "${CHROMA_S3_OBJS[$BLIP_2_MODEL]}"
 
 if [ ! -f "chroma.sqlite3" ]; then
     echo "Extracting Chroma database..."
