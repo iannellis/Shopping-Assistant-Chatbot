@@ -105,7 +105,7 @@ s3download_file "${CHROMA_FILES[$BLIP_2_MODEL]}" "${CHROMA_S3_OBJS[$BLIP_2_MODEL
 
 if [ ! -f "chroma.sqlite3" ]; then
     echo "Extracting Chroma database..."
-    tar -xf "${CHROMA_FILES[$BLIP_2_MODEL]}"
+    pv "${CHROMA_FILES[$BLIP_2_MODEL]}" | tar -xf-
 fi
 
 # Get the ABO dataset processed metadata

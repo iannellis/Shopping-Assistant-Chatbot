@@ -109,7 +109,7 @@ gdownload_file "${CHROMA_FILES[$BLIP_2_MODEL]}" "${CHROMA_GOOGLE_IDS[$BLIP_2_MOD
 
 if [ ! -f "chroma.sqlite3" ]; then
     echo "Extracting Chroma database..."
-    tar -xf "${CHROMA_FILES[$BLIP_2_MODEL]}"
+    pv "${CHROMA_FILES[$BLIP_2_MODEL]}" | tar -xf-
 fi
 
 # Get the ABO dataset processed metadata
