@@ -29,10 +29,10 @@ CHROMA_S3_OBJS["abo"]="chroma/chroma_abo.tar"
 CHROMA_S3_OBJS["coco"]="chroma/chroma_coco.tar"
 
 # ABO metadata Pandas dataframe file name and Google Drive ID
-ABO_METADATA_DF=("abo-listings-final-draft.pkl", "abo-listings-final-draft.pkl")
+ABO_METADATA_DF=("abo-listings-final-draft.pkl" "abo-listings-final-draft.pkl")
 
 # ABO images
-ABO_IMAGES=("abo-images-small.tar", "abo-images-small.tar")
+ABO_IMAGES=("abo-images-small.tar" "abo-images-small.tar")
 
 # Ensure the selected model is valid
 if [ -z "${MODEL_FILES[$BLIP_2_MODEL]}" ]; then
@@ -73,12 +73,6 @@ else
 fi
 
 sudo apt update
-
-# For downloading models from Google Drive
-sudo apt install pipx -y
-pipx ensurepath
-source ~/.bashrc
-pipx install gdown
 
 # For progress bars
 sudo apt install pv -y

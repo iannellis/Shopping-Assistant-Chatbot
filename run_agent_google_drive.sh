@@ -27,10 +27,10 @@ CHROMA_GOOGLE_IDS["abo"]="13iPFG_QuOydoyGKZpFvZCD4Tl7RybEBC"
 CHROMA_GOOGLE_IDS["coco"]="1AcjQmAimO04Dj8pSCkwoVapBDB5zl2LX"
 
 # ABO metadata Pandas dataframe file name and Google Drive ID
-ABO_METADATA_DF=("abo-listings-final-draft.pkl", "1hChAT7PL_3c9YQugQJFFOAElbRPV7yqg")
+ABO_METADATA_DF=("abo-listings-final-draft.pkl" "1hChAT7PL_3c9YQugQJFFOAElbRPV7yqg")
 
 # ABO images
-ABO_IMAGES=("abo-images-small.tar", "1wvEJbRL4hZ5de8Mm2sIvoZZ_frrl5MFl")
+ABO_IMAGES=("abo-images-small.tar" "1wvEJbRL4hZ5de8Mm2sIvoZZ_frrl5MFl")
 
 # Ensure the selected model is valid
 if [ -z "${MODEL_FILES[$BLIP_2_MODEL]}" ]; then
