@@ -1,5 +1,7 @@
-"""Take the metadata and images, create multimodal (text + image) embeddings, and add
-them to a chroma database. Then add the text-only strings to the database.
+"""Loads the metadata saved by the previous script from the file with suffix name 
+preprocess-4.pkl Takes the metadata and images, creates multimodal (text + image)
+embeddings, and add them to a collection in the chroma database. Then adds the text-only
+strings to a separate collection (text_only) in the database.
 
 Note: must be run using the 3.11 Python environment
 """

@@ -1,5 +1,5 @@
 """Read the metadata from .json.gz files into a Pandas dataframe, filter out non-English
-tagged items, and save into a pickle file."""
+tagged items, and save into a pickle file with suffix name preprocess-1.pkl."""
 import tomllib
 import os
 import pandas as pd

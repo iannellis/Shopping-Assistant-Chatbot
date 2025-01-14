@@ -1,5 +1,7 @@
-"""Run images and corresponding product_types through Llama-vision to check if the items
-are categorized correctly. Remove the product_type if not.
+"""Loads the metadata saved by the previous script from the file with suffix name 
+preprocess-3.pkl. Runs images and corresponding product_types through Llama-vision to
+check if the items are categorized correctly. Removes the product_type if not. Saves the
+metadata result in a pickle file with suffix preprocess-4.pkl
 
 Note that this file has a restart function to restart a run that crashed, but it is
 not yet setup to use it if the file is run directly.

@@ -1,9 +1,13 @@
-"""Run English-language checks on the metadata using Google's MediaPipe and optionally
-Google Cloud language detection.
+"""Loads the metadata saved by the previous script from the file with suffix name 
+preprocess-2.pkl. Runs English-language checks on the metadata using Google's MediaPipe
+and optionally Google Cloud language detection. If cloud language detection is run,
+saves the results in a pickle file with suffix cloud-language-detections.pkl. Drops
+metadata rows detected as non-English. Saves the metadata result in a pickle file with
+suffix preprocess-3.pkl.
 
 Note that Google Cloud language detection requires a Google Cloud account with the
-Cloud Translation API enabled, installation of the gcloud CLI, and logging in via the CLI:
-https://cloud.google.com/docs/authentication/set-up-adc-local-dev-environment"""
+Cloud Translation API enabled, installation of the gcloud CLI, and logging in via the
+CLI: https://cloud.google.com/docs/authentication/set-up-adc-local-dev-environment"""
 
 from mediapipe.tasks import python
 from mediapipe.tasks.python import text

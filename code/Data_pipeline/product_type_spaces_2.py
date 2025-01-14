@@ -1,5 +1,7 @@
-"""Replace any '_' in product_type in metadata with a ' ' and add spaces where they're
-missing."""
+"""Loads the metadata produced by the previous script from the file with suffix name
+pickle file with suffix name preprocess-1.pkl. Replaces any '_' in product_type in the 
+metadata with a ' ' and add spaces where they're missing. Saves the result in a pickle
+file with suffix name preprocess-2.pkl"""
 
 import pandas as pd
 import tomllib
