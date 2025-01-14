@@ -1,3 +1,6 @@
+"""Replace any '_' in product_type in metadata with a ' ' and add spaces where they're
+missing."""
+
 import pandas as pd
 import tomllib
 
@@ -7,7 +10,8 @@ warnings.filterwarnings('ignore')
 #-------------------------Work-performing Functions-------------------------------------
 def fix_product_type(pdf):
     """The product_type often has underscores or no spaces at all between words. This
-    function fixes that.
+    function fixes that by replacing the underscores with spaces and adding missing
+    spaces.
     
     Note: it will not fix unknown product_types without spaces between words."""
     
