@@ -125,7 +125,7 @@ st.subheader(f"Chat Name: {st.session_state.thread_name.replace("_", " ")}")
 
 # Show file uploader if no file has been uploaded
 if not st.session_state.user_image:
-    uploaded_file = st.file_uploader("Upload an image of the product you're searching for:")
+    uploaded_file = st.file_uploader("Upload an image of the product you're searching for to be used with your next prompt:")
     if uploaded_file is not None:
         image = base64.b64encode(uploaded_file.getvalue()).decode("utf-8")
         st.session_state.user_image = image
