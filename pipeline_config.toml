@@ -1,7 +1,7 @@
 [global]
 # Where to save temporary files produces between Python file runs
 working_dir = "/mnt/d/working/"
-# The prefix for those temporary files
+# The file name prefix for those temporary files
 meta_save_prefix = "abo-listings-"
 # Where the ABO dataset is located. See documentation for details.
 abo_dataset_dir = "/mnt/d/abo-dataset/"
