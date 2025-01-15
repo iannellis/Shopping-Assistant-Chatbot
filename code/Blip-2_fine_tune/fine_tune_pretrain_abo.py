@@ -17,8 +17,10 @@ import pandas as pd
 import os
 import random
 
-def run_fine_tune(abo_dataset_dir='/mnt/d/abo-dataset', device='cuda',
-                 save_dir='/mnt/d/abo-dataset/model_saves', batch_size=24, epochs=2):
+def run_fine_tune(abo_dataset_dir='/mnt/d/abo-dataset', 
+              abo_listings_file='abo-listings-english-fixed-product-type.pkl',
+              device='cuda', save_dir='/mnt/d/abo-dataset/model_saves',
+              batch_size=24, epochs=2):
     """The orchechestrator function for the fine-tuning. It loads the model and
     processors, calls the function to build the dataloader, sets up the opimizer,
     sets up distributed processing group, calls the training function, saves the final
@@ -26,7 +28,7 @@ def run_fine_tune(abo_dataset_dir='/mnt/d/abo-dataset', device='cuda',
     model, vis_processors, txt_processors = load_model_and_preprocess(
         name="blip2_feature_extractor", model_type="pretrain", is_eval=False, device=device)
     images_dir = abo_dataset_dir + '/images/small'
-    metadata_file = abo_dataset_dir + '/abo-listings-english-fixed-product-type.pkl'
+    metadata_file = abo_dataset_dir + '/' + abo_listings_file
     image_metadata_file = abo_dataset_dir + '/images/metadata/images.csv'
 
     train_dataloader = build_abo_dataloader(images_dir, metadata_file, image_metadata_file,
