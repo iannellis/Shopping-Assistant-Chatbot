@@ -19,10 +19,6 @@ CHROMA_HOST = "chroma"
 OLLAMA_HOST = "ollama"
 BLIP_2_HOST = "blip-2"
 
-# CHROMA_HOST = "localhost"
-# OLLAMA_HOST = "localhost"
-# BLIP_2_HOST = "localhost"
-
 class Chroma_Collection_Connection():
     """Class to connect to the Chroma database and query it with embeddings, then filter
     the results down to CHROMA_MAX_ITEMS items. Includes both the BLIP-2 and text-only
