@@ -7,10 +7,7 @@ import base64
 import os
 from time import sleep
 
-# from icecream import ic
-
 agent_url = "http://agent:" + os.environ["AGENT_PORT"] + "/api/v1"
-# agent_url = "http://localhost:9001/api/v1"
 
 # make sure agent is up and running before fully loading UI, otherwise shows errors
 response = None
