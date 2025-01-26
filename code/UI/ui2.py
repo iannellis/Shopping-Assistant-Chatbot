@@ -39,17 +39,18 @@ def save_feedback(response_idx: str):
     
 def integrate_images(messages):
     """When loading an existing thread, integrate the images sent from the agent
-    into a form usable by Streamlit."""
+    into a form usable by Streamlit. Also add spaces before new line characters, as
+    required by Streamlit."""
     for message in messages:
+        new_message_content = []
         if message["images"]:
-            new_message_content = []
             images = message.pop("images")
             for idx, base64_image in enumerate(images):
                 new_message_content.append("### Product " + str(idx+1) + ":")
                 image = Image.open(io.BytesIO(base64.b64decode(base64_image)))
                 new_message_content.append(image)
-            new_message_content.append(message["content"])
-            message["content"] = new_message_content
+        new_message_content.append(message["content"].replace('\n', '  \n'))
+        message["content"] = new_message_content
     return messages
 
 def stream_response(response):
