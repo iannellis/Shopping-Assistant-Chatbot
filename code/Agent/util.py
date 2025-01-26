@@ -200,7 +200,7 @@ class ABO_Dataset():
         """Get the row of data and convert it to a string consumable by an LLM."""
         row = self.abo_meta.loc[item_id]
         row_filtered = row.dropna()
-        text = []
+        text = ['{item id: ' + item_id + '}; ']
         for row_heading, row_item in zip(row_filtered.index, row_filtered):
             if row_item:  # some are things like empty lists
                 text.append('{')

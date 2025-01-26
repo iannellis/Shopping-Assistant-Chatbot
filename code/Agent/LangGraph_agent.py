@@ -142,18 +142,21 @@ def generate(state: MessagesState):
             'You are being provided an enumerated list of products. Briefly tell the '
             'user that you found the closest matches to what they\'re looking for in '
             'your database. Then, using only the information provided below, enumerate '
-            'each product, provide its name, then a 1 or 2-sentence summary. For '
-            'example:\n'
+            'each product, provide its name, then the item id, then a 1 or 2 sentence '
+            'summary. For example:\n'
             '   1. **The best ketchup in the world**\n'
+            '      Item id: B06X9STHNG\n'
             '      Rated #1 by the World Ketchup Forum, this ketchup will jazz up your '
             '      food so that your guests never complain about its blandness again.\n'
             '\n'
             '   2. **World’s biggest pumpkin**\n'
+            '      Item id: B07P8ML82R\n'
             '      Making it into the Gueniss Book of World Records, this pumpkin weighs '
             '      in at one ton. With its stunning orange color, it\'s a must for '
             '      anybody aiming to throw the biggest Halloween party in town.\n'
             '\n'
             '   3. **Military-grade water bottle**\n'
+            '      Item id: B07H9GMYXS\n'
             '      If your water bottle is always getting broken due to your strenuous '
             '      activities, this is the water bottle for you. Tested to withstand up '
             '      to one ton of weight.\n'
@@ -161,7 +164,7 @@ def generate(state: MessagesState):
             'match the user prompt. '
             'Always list all the items and provide a summary of each. '
             'Only use the information below in this system prompt to develop the summaries. '
-            'List the items in the order they were provided to you. Here is the '
+            'List the items in the order they are provided to you. Here is the '
             'product information:\n'
             f'{docs_content}'
         )
@@ -191,7 +194,7 @@ graph_builder.add_edge("generate", END)
 memory = MemorySaver()
 graph = graph_builder.compile(checkpointer=memory)
     
-# For outside funtion to calls
+# For outside function to call
 def prompt(thread_id: str, prompt_str: str="", image_b64: str=""):
     """Run a user's prompt through the model"""
     config = {"configurable": {"thread_id": thread_id}}
