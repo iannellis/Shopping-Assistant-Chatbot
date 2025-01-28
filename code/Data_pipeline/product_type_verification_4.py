@@ -6,7 +6,10 @@ metadata result in a pickle file with suffix preprocess-4.pkl
 Note that this file has a restart function to restart a run that crashed, but it is
 not yet setup to use it if the file is run directly.
 
-This code almost completely comes from the Llama_data_checks directory."""
+This code almost completely comes from the Llama_data_checks directory.
+
+Note: must be run using the 3.12 Python environment
+"""
 
 import torch
 from transformers import MllamaForConditionalGeneration, AutoProcessor, BitsAndBytesConfig
@@ -15,7 +18,6 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 import tomllib
-import gzip
 
 import warnings
 warnings.filterwarnings('ignore')
