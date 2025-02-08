@@ -18,7 +18,7 @@ for i in "${!texts[@]}"; do
   
   start_time=$(date +%s%N)
   
-  curl -X POST "http://3.87.196.67:9001/api/v1/prompt" \
+  curl -X POST "http://3.86.148.142:9001/api/v1/prompt" \
        -H "Content-Type: application/json" \
        -d "{\"thread_id\": \"$thread_id\", \"text\": \"$text\", \"image\": \"$image\"}"
   
