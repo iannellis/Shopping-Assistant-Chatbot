@@ -1,0 +1,2 @@
+set AGENT_URL=http://52.90.201.143:9010/api/v1
+set NUMBER_OF_TIMES=30

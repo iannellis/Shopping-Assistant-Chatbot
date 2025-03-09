@@ -11,9 +11,14 @@ import random
 initial_chunk_time = ""
 
 AGENT_URL = os.getenv("AGENT_URL")
+NUM_TIMES = int(os.getenv("NUMBER_OF_TIMES"))
 
 if ( AGENT_URL is None or AGENT_URL == ""):   
     print("AGENT_URL is not set. Please set the AGENT_URL environment variable.")
+    exit(1)
+
+if ( NUM_TIMES is None or NUM_TIMES == ""):   
+    print("NUMBER_OF_TIMES is not set. Please set the number times to invoke the request.")
     exit(1)
 
 
@@ -77,18 +82,28 @@ initial_chunk_times = []
 
 # Folder containing images
 image_folder = 'testing'
+counter = 0
+with_image_counter = 0
+without_image_counter = 0
 
-for _ in range(30):  # Run the requests_data 30 times
+for _ in range(NUM_TIMES):  # Run the requests_data NUM_TIMES times
+    print(f"Run number: {counter}")
+    counter += 1
     for data in requests_data:
         # Generate a random and unique thread_id
         thread_id = str(random.randint(1000, 9999))  # Ensure thread_id is a string
         # Decide whether to include an image or not
         if random.random() < 1/3:  # Approximately 10 out of 30 times
             base64_image = get_random_base64_image(image_folder)
+            print('\t Request Sent with image as input')
+            with_image_counter += 1
         else:
             base64_image = ''
+            print('\t Request Sent without image as input')
+            without_image_counter += 1
+
         to_post = {"thread_id": thread_id, "text": data["text"], "image": base64_image}
-        print(f"Posting to URL: {agent_url} with payload: {to_post}")
+        #print(f"Posting to URL: {agent_url} with payload: {to_post}")
 
         try:
             response = requests.post(agent_url, headers=headers, json=to_post, stream=True)
@@ -98,7 +113,7 @@ for _ in range(30):  # Run the requests_data 30 times
             for item in streamed_response:
                 if isinstance(item, float):
                     initial_chunk_times.append(item)
-                print(item)  # Print each item in the streamed response
+                #print(item)  # Print each item in the streamed response
 
         except requests.RequestException as e:
             print(f"Request failed: {e}")
@@ -107,6 +122,10 @@ for _ in range(30):  # Run the requests_data 30 times
 if initial_chunk_times:
     mean_time = np.mean(initial_chunk_times)
     percentile_99_time = np.percentile(initial_chunk_times, 99)
+    print(f"Total Requests made: {NUM_TIMES * len(requests_data)}")
+    print(f"\t Number of requests with image: {with_image_counter}")
+    print(f"\t Number of requests without image: {without_image_counter}")
+    #print(f"Number of chunks overall: {len(initial_chunk_times)}")
     print(f"\nMean initial chunk time: {mean_time} seconds")
     print(f"99th percentile initial chunk time: {percentile_99_time} seconds")
 else:
