@@ -2,7 +2,7 @@
 name = "py3.12_agent"
 version = "0.1.0"
 description = ""
-authors = ["Ian Ellis <iellis@minevaluation.com>"]
+authors = ["Ian Ellis"]
 readme = "README.md"
 package-mode = false
 
