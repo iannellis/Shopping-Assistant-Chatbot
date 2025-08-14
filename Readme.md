@@ -34,7 +34,7 @@ Five containers work together:
 
 All components are described in `docker/docker-compose.yml` and built with `docker/*.dockerfile`. Environment is governed by `docker/.env`.
 
-See Documentation.pdf for more details.
+See `Documentation.pdf` for more details.
 
 ---
 
