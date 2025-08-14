@@ -15,6 +15,12 @@ This implementation focuses on small-ish models that fit within a **single 12 
 
 ---
 
+## Documentation
+
+Further details and information about implementation decisions can be found in `Documentation.pdf`.
+
+---
+
 ## Architecture at a glance
 Five containers work together:
 
@@ -33,8 +39,6 @@ Five containers work together:
 5. **Ollama** — serves **Llama‑3.1‑8B‑Instruct** (configurable) on **port 11434** with GPU acceleration.
 
 All components are described in `docker/docker-compose.yml` and built with `docker/*.dockerfile`. Environment is governed by `docker/.env`.
-
-See `Documentation.pdf` for more details.
 
 ---
 
