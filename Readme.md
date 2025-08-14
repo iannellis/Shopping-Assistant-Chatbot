@@ -2,7 +2,7 @@
 
 > Streamlit UI + LangGraph agent orchestrating an Ollama LLM, a BLIP‑2 multimodal embedding service, and a Chroma vector DB — all tied together with Docker.
 
-**Note:** The asset files necessary to run the agent are no longer available online. However, all the code required to re-create them is available in this repository.
+**Note:** While the database and model files necessary to run the agent are no longer available online, a screen recording is included in `Screen recording.webm`. All the code required to re-create the files are available in this repository.
 
 ## What is this?
 ShopTalk is a multimodal shopping assistant chatbot that performs retrieval augmented generation (RAG) on products in the Amazon Berkeley Objects (ABO) dataset. It lets a user search for products using **text**, an **image**, or both. Under the hood it:
