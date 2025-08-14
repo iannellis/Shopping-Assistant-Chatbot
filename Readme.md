@@ -1,4 +1,4 @@
-# ShopTalk — Multimodal Shopping Assistant
+# 🤖 ShopTalk — Multimodal Shopping Assistant
 
 > Streamlit UI + LangGraph agent orchestrating an Ollama LLM, a BLIP‑2 multimodal embedding service, and a Chroma vector DB — all tied together with Docker.
 
